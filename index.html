@@ -40,6 +40,9 @@
         </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+        <button id="googleAuthBtn" onclick="signInWithGoogle()" class="bg-white/20 hover:bg-white/30 text-white font-bold text-xs px-3 py-2 rounded-xl border border-white/20 transition flex items-center gap-1.5">
+          🔑 Sign in with Google
+        </button>
         <!-- Live GPS Toggle -->
         <button id="toggleGpsBtn" class="bg-white/20 hover:bg-white/30 text-white font-bold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1.5 border border-white/20">
           <span id="gpsDot" class="w-2 h-2 rounded-full bg-slate-300"></span>
@@ -105,7 +108,7 @@
       <div class="lg:col-span-6 space-y-4">
         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2">              
               <span class="text-lg">🗺️</span>
               <h3 class="font-bold text-sm text-slate-800">Itinerary & Member Radar</h3>
             </div>
@@ -622,20 +625,13 @@
     render();
   </script>
 <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.0.0/firebase-analytics.js";
-  import { getAuth,signinWithPopup,GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
-  
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+  // 1. Imports from Firebase CDN
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  // 2. Your Firebase Configuration (From your project)
   const firebaseConfig = {
-    apiKey: "AIzaSyAAkAIIsAjPIDTjn7JHnSbABzg8FJsC_G4",
+    apiKey: "AIzaSyAAkAIISAjPIDTjn7JHnSbABzg8FJsC_G4",
     authDomain: "vietnam-travel-app-66ce8.firebaseapp.com",
     projectId: "vietnam-travel-app-66ce8",
     storageBucket: "vietnam-travel-app-66ce8.firebasestorage.app",
@@ -644,9 +640,53 @@
     measurementId: "G-TFJK3880E7"
   };
 
-  // Initialize Firebase
+  // 3. Initialize App and Services in the correct order
   const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // 4. Your Sign-In Function
+  async function signInWithGoogle() {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("User signed in:", user.displayName);
+      alert(`Welcome, ${user.displayName}! You are signed in.`);
+    } catch (error) {
+      console.error("Error signing in:", error.message);
+      alert(`Sign in error: ${error.message}`);
+    }
+  }
+
+  // 5. Sign-Out Function
+  async function logOut() {
+    try {
+      await signOut(auth);
+      console.log("User signed out");
+    } catch (error) {
+      console.error("Error signing out:", error.message);
+    }
+  }
+
+  // 6. Listen for Login State (Auto-updates UI when someone logs in)
+  onAuthStateChanged(auth, (user) => {
+    const authBtn = document.getElementById("googleAuthBtn");
+    if (!authBtn) return;
+
+    if (user) {
+      authBtn.innerHTML = `👋 ${user.displayName || 'Family Member'}`;
+      authBtn.onclick = logOut;
+      authBtn.title = "Click to sign out";
+    } else {
+      authBtn.innerHTML = `🔑 Sign in with Google`;
+      authBtn.onclick = signInWithGoogle;
+      authBtn.title = "Sign in with Google";
+    }
+  });
+
+  // 7. Make functions accessible to HTML buttons
+  window.signInWithGoogle = signInWithGoogle;
+  window.logOut = logOut;
 </script>
 </body>
 </html>
