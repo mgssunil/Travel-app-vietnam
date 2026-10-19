@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vietnam Family Adventure - Live Map & Weather</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    #map { height: 420px; border-radius: 1.25rem; z-index: 10; }
+    .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.4); opacity: 0.2; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .radar-pulse {
+      animation: pulse-ring 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white shadow-lg sticky top-0 z-30">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl shadow-inner">
+          🇻🇳
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight">Vietnam Family Adventure</h1>
+          <p class="text-xs text-rose-100 font-medium">Hanoi • Ha Long Bay • Hoi An • Late Nov 2026</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+        <!-- Live GPS Toggle -->
+        <button id="toggleGpsBtn" class="bg-white/20 hover:bg-white/30 text-white font-bold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1.5 border border-white/20">
+          <span id="gpsDot" class="w-2 h-2 rounded-full bg-slate-300"></span>
+          <span id="gpsBtnText">Share My Location</span>
+        </button>
+        <!-- Active User Selector -->
+        <div class="bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs">
+          <span class="text-rose-100 font-medium">Viewing as:</span>
+          <select id="userSelector" class="bg-transparent font-bold text-white focus:outline-none cursor-pointer">
+            <!-- Dynamically Populated -->
+          </select>
+        </div>
+        <button id="openMembersModalBtn" class="bg-white/15 hover:bg-white/25 text-white font-semibold text-xs px-3 py-2 rounded-xl transition">
+          👥 Members (<span id="memberCountBadge">0</span>)
+        </button>
+        <button id="openAddModalBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm transition">
+          + Add Plan
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-1 space-y-6">
+
+    <!-- Day Navigation & Destination Weather Banner -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+      
+      <!-- Day Tabs -->
+      <div class="md:col-span-8 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-2 overflow-x-auto custom-scrollbar">
+        <div id="dayTabsContainer" class="flex items-center gap-2"></div>
+        <button id="addDayBtn" class="text-xs text-rose-600 hover:text-rose-700 font-bold whitespace-nowrap px-3 py-2 bg-rose-50 rounded-xl">
+          + Add Day
+        </button>
+      </div>
+
+      <!-- Live Weather Card -->
+      <div class="md:col-span-4 bg-gradient-to-br from-sky-500 to-blue-600 text-white p-3.5 rounded-2xl shadow-sm border border-sky-400 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div id="weatherIcon" class="text-3xl">🌤️</div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span id="weatherCity" class="text-xs font-bold uppercase tracking-wider text-sky-100">Hanoi, Vietnam</span>
+              <span id="weatherLiveBadge" class="text-[9px] bg-sky-400/50 px-1.5 py-0.2 rounded font-bold">LIVE</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span id="weatherTemp" class="text-2xl font-black">24°C</span>
+              <span id="weatherCondition" class="text-xs font-medium text-sky-100">Partly Cloudy</span>
+            </div>
+          </div>
+        </div>
+        <div class="text-right text-[11px] text-sky-100 font-medium">
+          <p id="weatherRain">Rain: 10%</p>
+          <p id="weatherWind">Wind: 12 km/h</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map & Group Proximity Split -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- Left Column: Interactive Map & Live Member Proximity -->
+      <div class="lg:col-span-6 space-y-4">
+        <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🗺️</span>
+              <h3 class="font-bold text-sm text-slate-800">Itinerary & Member Radar</h3>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live Tracking
+              </span>
+            </div>
+          </div>
+          <div id="map"></div>
+          <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+            <span>🔴 Sightseeing spots</span>
+            <span>🟡 Food / Dining</span>
+            <span>🔵 Live Family GPS</span>
+          </div>
+        </div>
+
+        <!-- Family Live Proximity Tracker -->
+        <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold uppercase text-slate-500 tracking-wider">Family Live Locations & Distance</h4>
+            <span class="text-[10px] text-slate-400">Updates automatically</span>
+          </div>
+          <div id="familyProximityList" class="space-y-2">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Day Schedule -->
+      <div class="lg:col-span-6 space-y-4">
+        
+        <!-- Category Filters -->
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div class="flex items-center gap-1.5">
+            <button data-filter="all" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white transition">All</button>
+            <button data-filter="visit" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 transition">🏛️ Sightseeing</button>
+            <button data-filter="food" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 transition">🍜 Dining</button>
+            <button data-filter="transit" class="filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 text-slate-600 transition">✈️ Tickets</button>
+          </div>
+          <span id="activeDayLabel" class="text-xs font-semibold text-slate-500">Day Schedule</span>
+        </div>
+
+        <!-- Timeline Cards -->
+        <div id="itineraryList" class="space-y-3"></div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Add Activity Modal -->
+  <div id="activityModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-slate-100">
+      <div class="bg-gradient-to-r from-rose-600 to-amber-600 px-6 py-4 text-white flex items-center justify-between">
+        <h3 class="font-bold text-base">Add New Plan</h3>
+        <button id="closeModalBtn" class="text-white/80 hover:text-white text-xl">&times;</button>
+      </div>
+      <form id="activityForm" class="p-6 space-y-4">
+        <div class="grid grid-cols-3 gap-2">
+          <label class="cursor-pointer">
+            <input type="radio" name="category" value="visit" class="peer sr-only" checked>
+            <div class="peer-checked:bg-rose-50 peer-checked:border-rose-500 peer-checked:text-rose-700 border border-slate-200 rounded-xl p-2 text-center transition">
+              <div class="text-base">🏛️</div>
+              <div class="text-xs font-bold">Visit</div>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="category" value="food" class="peer sr-only">
+            <div class="peer-checked:bg-amber-50 peer-checked:border-amber-500 peer-checked:text-amber-700 border border-slate-200 rounded-xl p-2 text-center transition">
+              <div class="text-base">🍜</div>
+              <div class="text-xs font-bold">Food</div>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="category" value="transit" class="peer sr-only">
+            <div class="peer-checked:bg-blue-50 peer-checked:border-blue-500 peer-checked:text-blue-700 border border-slate-200 rounded-xl p-2 text-center transition">
+              <div class="text-base">✈️</div>
+              <div class="text-xs font-bold">Transit</div>
+            </div>
+          </label>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Place / Activity Name</label>
+          <input type="text" id="itemName" required placeholder="e.g. Ha Long Bay Cruise" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Time</label>
+            <input type="time" id="itemTime" required value="09:00" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Day</label>
+            <select id="itemDaySelect" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl"></select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Latitude</label>
+            <input type="number" step="0.0001" id="itemLat" value="21.0285" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Longitude</label>
+            <input type="number" step="0.0001" id="itemLng" value="105.8542" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+          </div>
+        </div>
+
+        <!-- Ticket Drawer -->
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+          <span class="text-xs font-bold text-slate-700">🎟️ Ticket Reference (Optional)</span>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="ticketPnr" placeholder="Booking Ref / PNR" class="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg">
+            <input type="text" id="ticketSeat" placeholder="Seat / Room" class="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-lg">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" id="cancelModalBtn" class="px-4 py-2 text-xs font-semibold text-slate-500">Cancel</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-sm">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Members Modal -->
+  <div id="membersModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-base text-slate-800">Trip Members & Permissions</h3>
+        <button id="closeMembersModalBtn" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
+      </div>
+      <div id="membersList" class="space-y-2 max-h-60 overflow-y-auto"></div>
+    </div>
+  </div>
+
+  <script>
+    // --- Application State ---
+    const STATE = {
+      currentUser: "user-1",
+      isSharingGps: false,
+      userLocation: null,
+      members: [
+        { id: "user-1", name: "You (Admin)", role: "admin", lat: 21.0310, lng: 105.8520, active: true },
+        { id: "user-2", name: "Sister", role: "editor", lat: 21.0295, lng: 105.8540, active: true },
+        { id: "user-3", name: "Mom", role: "editor", lat: 21.0270, lng: 105.8505, active: true }
+      ],
+      currentDayId: "day-1",
+      days: [
+        { id: "day-1", name: "Day 1 (Nov 24)", date: "Hanoi & Old Quarter", city: "Hanoi", lat: 21.0285, lng: 105.8542 },
+        { id: "day-2", name: "Day 2 (Nov 25)", date: "Ha Long Bay Cruise", city: "Ha Long", lat: 20.9500, lng: 107.0733 },
+        { id: "day-3", name: "Day 3 (Nov 26)", date: "Hoi An Ancient Town", city: "Hoi An", lat: 15.8801, lng: 108.3380 }
+      ],
+      items: [
+        {
+          id: "it-1",
+          dayId: "day-1",
+          time: "10:30",
+          name: "Flight Arrival at Noi Bai (HAN)",
+          category: "transit",
+          lat: 21.2212,
+          lng: 105.8072,
+          ticket: { pnr: "VN-5291", seat: "14A, 14B, 14C" },
+          notes: "Hotel pickup waiting at arrival pole 10."
+        },
+        {
+          id: "it-2",
+          dayId: "day-1",
+          time: "13:00",
+          name: "Lunch at Bun Cha Huong Lien",
+          category: "food",
+          lat: 21.0168,
+          lng: 105.8538,
+          ticket: null,
+          notes: "Famous Bourdain & Obama noodle table."
+        },
+        {
+          id: "it-3",
+          dayId: "day-1",
+          time: "16:00",
+          name: "Hoan Kiem Lake & Red Bridge",
+          category: "visit",
+          lat: 21.0307,
+          lng: 105.8524,
+          ticket: { pnr: "TKT-882", seat: "Entry" },
+          notes: "Scenic afternoon walk across the bridge."
+        },
+        {
+          id: "it-4",
+          dayId: "day-2",
+          time: "11:30",
+          name: "Board Ha Long Bay Cruise",
+          category: "visit",
+          lat: 20.9500,
+          lng: 107.0733,
+          ticket: { pnr: "CRUISE-90", seat: "Deluxe Balcony" },
+          notes: "Afternoon kayak tour through karst caves."
+        },
+        {
+          id: "it-5",
+          dayId: "day-3",
+          time: "18:00",
+          name: "Hoi An Lantern Street & River Boat",
+          category: "visit",
+          lat: 15.8801,
+          lng: 108.3380,
+          ticket: null,
+          notes: "Float flower paper lanterns for good luck."
+        }
+      ]
+    };
+
+    let mapInstance = null;
+    let markersLayer = null;
+    let gpsWatchId = null;
+
+    // --- Distance Calculation (Haversine Formula) ---
+    function getDistanceMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; // Earth radius in meters
+      const rad = Math.PI / 180;
+      const dLat = (lat2 - lat1) * rad;
+      const dLon = (lon2 - lon1) * rad;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return Math.round(R * c);
+    }
+
+    function formatDistance(meters) {
+      if (meters < 1000) return `${meters} m away`;
+      return `${(meters / 1000).toFixed(1)} km away`;
+    }
+
+    // --- Weather Integration (Open-Meteo) ---
+    async function fetchWeatherForDay(day) {
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${day.lat}&longitude=${day.lng}&current=temperature_2m,precipitation,weather_code,wind_speed_10m`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data && data.current) {
+          const temp = Math.round(data.current.temperature_2m);
+          const rain = data.current.precipitation || 0;
+          const wind = Math.round(data.current.wind_speed_10m || 10);
+          
+          document.getElementById("weatherCity").textContent = `${day.city}, Vietnam`;
+          document.getElementById("weatherTemp").textContent = `${temp}°C`;
+          document.getElementById("weatherRain").textContent = `Rain: ${rain} mm`;
+          document.getElementById("weatherWind").textContent = `Wind: ${wind} km/h`;
+
+          // Simple weather code description
+          const code = data.current.weather_code;
+          if (code === 0) {
+            document.getElementById("weatherCondition").textContent = "Clear Sky";
+            document.getElementById("weatherIcon").textContent = "☀️";
+          } else if (code <= 3) {
+            document.getElementById("weatherCondition").textContent = "Partly Cloudy";
+            document.getElementById("weatherIcon").textContent = "⛅";
+          } else if (code >= 51 && code <= 65) {
+            document.getElementById("weatherCondition").textContent = "Light Rain";
+            document.getElementById("weatherIcon").textContent = "🌧️";
+          } else {
+            document.getElementById("weatherCondition").textContent = "Pleasant Breeze";
+            document.getElementById("weatherIcon").textContent = "🌤️";
+          }
+        }
+      } catch (err) {
+        console.warn("Weather fetch fallback", err);
+      }
+    }
+
+    // --- Initialize Leaflet Map ---
+    function initMap() {
+      if (mapInstance) return;
+      mapInstance = L.map('map').setView([21.0285, 105.8542], 12);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(mapInstance);
+      markersLayer = L.layerGroup().addTo(mapInstance);
+    }
+
+    // --- Update Map Markers ---
+    function updateMap() {
+      if (!markersLayer) return;
+      markersLayer.clearLayers();
+
+      const bounds = [];
+
+      // 1. Plot Itinerary Stops for Active Day
+      const dayItems = STATE.items.filter(i => i.dayId === STATE.currentDayId);
+      dayItems.forEach(item => {
+        if (item.lat && item.lng) {
+          const color = item.category === 'food' ? '#f59e0b' : (item.category === 'transit' ? '#3b82f6' : '#e11d48');
+          const marker = L.circleMarker([item.lat, item.lng], {
+            radius: 8,
+            fillColor: color,
+            color: '#fff',
+            weight: 2,
+            fillOpacity: 0.9
+          });
+          marker.bindPopup(`<strong>${item.name}</strong><br/>⏰ ${item.time}`);
+          markersLayer.addLayer(marker);
+          bounds.push([item.lat, item.lng]);
+        }
+      });
+
+      // 2. Plot Family Members Live Radar Pins
+      STATE.members.forEach(m => {
+        if (m.lat && m.lng && m.active) {
+          const isMe = m.id === STATE.currentUser;
+          const memberMarker = L.circleMarker([m.lat, m.lng], {
+            radius: isMe ? 9 : 7,
+            fillColor: isMe ? '#2563eb' : '#059669',
+            color: '#fff',
+            weight: 2,
+            fillOpacity: 1
+          });
+          memberMarker.bindPopup(`<strong>👤 ${m.name}</strong><br/>📍 Live Position`);
+          markersLayer.addLayer(memberMarker);
+          bounds.push([m.lat, m.lng]);
+        }
+      });
+
+      if (bounds.length > 0) {
+        mapInstance.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+      }
+    }
+
+    // --- Render Proximity List ---
+    function renderProximity() {
+      const container = document.getElementById("familyProximityList");
+      container.innerHTML = "";
+
+      const me = STATE.members.find(m => m.id === STATE.currentUser) || STATE.members[0];
+
+      STATE.members.forEach(member => {
+        if (member.id === me.id) return;
+        const dist = getDistanceMeters(me.lat, me.lng, member.lat, member.lng);
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between p-2.5 bg-slate-50 rounded-xl text-xs";
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <div>
+              <p class="font-bold text-slate-800">${member.name}</p>
+              <p class="text-[10px] text-slate-400 capitalize">${member.role}</p>
+            </div>
+          </div>
+          <span class="font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">
+            📍 ${formatDistance(dist)}
+          </span>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    // --- GPS Toggle Handler ---
+    const toggleGpsBtn = document.getElementById("toggleGpsBtn");
+    const gpsDot = document.getElementById("gpsDot");
+    const gpsBtnText = document.getElementById("gpsBtnText");
+
+    toggleGpsBtn.onclick = () => {
+      if (!STATE.isSharingGps) {
+        if ("geolocation" in navigator) {
+          gpsBtnText.textContent = "Acquiring GPS...";
+          gpsWatchId = navigator.geolocation.watchPosition(
+            (pos) => {
+              STATE.isSharingGps = true;
+              const me = STATE.members.find(m => m.id === STATE.currentUser);
+              if (me) {
+                me.lat = pos.coords.latitude;
+                me.lng = pos.coords.longitude;
+              }
+              gpsDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+              gpsBtnText.textContent = "Live GPS Active";
+              updateMap();
+              renderProximity();
+            },
+            (err) => {
+              console.warn("GPS access denied, using simulated Vietnam location", err);
+              // Fallback to active simulated coordinates
+              STATE.isSharingGps = true;
+              gpsDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+              gpsBtnText.textContent = "Simulated GPS";
+              updateMap();
+              renderProximity();
+            },
+            { enableHighAccuracy: true }
+          );
+        }
+      } else {
+        if (gpsWatchId) navigator.geolocation.clearWatch(gpsWatchId);
+        STATE.isSharingGps = false;
+        gpsDot.className = "w-2 h-2 rounded-full bg-slate-300";
+        gpsBtnText.textContent = "Share My Location";
+        updateMap();
+      }
+    };
+
+    // --- Render Itinerary & Tabs ---
+    function render() {
+      // Day Tabs
+      const tabs = document.getElementById("dayTabsContainer");
+      tabs.innerHTML = "";
+      STATE.days.forEach(day => {
+        const isActive = day.id === STATE.currentDayId;
+        const btn = document.createElement("button");
+        btn.className = `px-3.5 py-2 rounded-xl text-left whitespace-nowrap flex flex-col transition ${
+          isActive ? 'bg-rose-600 text-white shadow-md' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+        }`;
+        btn.innerHTML = `
+          <span class="text-xs font-bold">${day.name}</span>
+          <span class="text-[10px] ${isActive ? 'text-rose-100' : 'text-slate-500'}">${day.city}</span>
+        `;
+        btn.onclick = () => {
+          STATE.currentDayId = day.id;
+          fetchWeatherForDay(day);
+          render();
+        };
+        tabs.appendChild(btn);
+      });
+
+      // Itinerary List
+      const list = document.getElementById("itineraryList");
+      list.innerHTML = "";
+      const currentDay = STATE.days.find(d => d.id === STATE.currentDayId);
+      document.getElementById("activeDayLabel").textContent = currentDay ? `${currentDay.name} - ${currentDay.date}` : "Agenda";
+
+      const dayItems = STATE.items.filter(i => i.dayId === STATE.currentDayId);
+      dayItems.sort((a, b) => a.time.localeCompare(b.time));
+
+      dayItems.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow transition space-y-2 cursor-pointer";
+        card.onclick = () => mapInstance.flyTo([item.lat, item.lng], 14);
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">⏰ ${item.time}</span>
+            <span class="text-xs font-bold text-rose-600">${item.category.toUpperCase()}</span>
+          </div>
+          <h4 class="text-sm font-bold text-slate-900">${item.name}</h4>
+          ${item.notes ? `<p class="text-xs text-slate-500">${item.notes}</p>` : ''}
+          ${item.ticket ? `
+            <div class="bg-slate-50 p-2 rounded-xl text-xs text-slate-600 flex justify-between">
+              <span>🎟️ Ref: <strong>${item.ticket.pnr}</strong></span>
+              <span>Seat: ${item.ticket.seat}</span>
+            </div>
+          ` : ''}
+        `;
+        list.appendChild(card);
+      });
+
+      // User Selector
+      const userSelector = document.getElementById("userSelector");
+      userSelector.innerHTML = "";
+      STATE.members.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        opt.textContent = `${m.name}`;
+        if (m.id === STATE.currentUser) opt.selected = true;
+        userSelector.appendChild(opt);
+      });
+
+      document.getElementById("memberCountBadge").textContent = STATE.members.length;
+
+      updateMap();
+      renderProximity();
+    }
+
+    // Modal Events
+    document.getElementById("openAddModalBtn").onclick = () => {
+      const select = document.getElementById("itemDaySelect");
+      select.innerHTML = "";
+      STATE.days.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d.id;
+        opt.textContent = d.name;
+        if (d.id === STATE.currentDayId) opt.selected = true;
+        select.appendChild(opt);
+      });
+      document.getElementById("activityModal").classList.remove("hidden");
+    };
+    document.getElementById("closeModalBtn").onclick = () => document.getElementById("activityModal").classList.add("hidden");
+    document.getElementById("cancelModalBtn").onclick = () => document.getElementById("activityModal").classList.add("hidden");
+
+    document.getElementById("activityForm").onsubmit = (e) => {
+      e.preventDefault();
+      const pnr = document.getElementById("ticketPnr").value.trim();
+      STATE.items.push({
+        id: `it-${Date.now()}`,
+        dayId: document.getElementById("itemDaySelect").value,
+        time: document.getElementById("itemTime").value,
+        name: document.getElementById("itemName").value.trim(),
+        category: document.querySelector('input[name="category"]:checked').value,
+        lat: parseFloat(document.getElementById("itemLat").value) || 21.0285,
+        lng: parseFloat(document.getElementById("itemLng").value) || 105.8542,
+        ticket: pnr ? { pnr, seat: document.getElementById("ticketSeat").value.trim() } : null
+      });
+      document.getElementById("activityModal").classList.add("hidden");
+      render();
+    };
+
+    // User Switcher
+    document.getElementById("userSelector").onchange = (e) => {
+      STATE.currentUser = e.target.value;
+      render();
+    };
+
+    // Start App
+    initMap();
+    fetchWeatherForDay(STATE.days[0]);
+    render();
+  </script>
+</body>
+</html>
