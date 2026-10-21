@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vietnam Family Adventure - Live Map, Weather & Dual Clock</title>
+  <title>Travel Companion - Multi-Country Planner, Live Map & Dual Clock</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -21,16 +21,32 @@
 
   <!-- Header -->
   <header class="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white shadow-lg sticky top-0 z-30">
-    <div class="max-w-6xl mx-auto px-4 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      
+      <!-- Brand & Trip Details -->
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl shadow-inner">
+        <div id="countryFlagIcon" class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl shadow-inner">
           🇻🇳
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-tight">Vietnam Family Adventure</h1>
-          <p class="text-xs text-rose-100 font-medium">Hanoi • Ha Long Bay • Hoi An • Late Nov 2026</p>
+          <div class="flex items-center gap-2">
+            <h1 id="tripTitleDisplay" class="text-lg sm:text-xl font-bold tracking-tight">Vietnam Family Adventure</h1>
+            <!-- Country Selector Dropdown -->
+            <select id="destinationSelector" class="bg-black/25 hover:bg-black/35 text-white font-bold text-xs px-2.5 py-1 rounded-xl border border-white/20 focus:outline-none cursor-pointer transition">
+              <option value="vietnam">🇻🇳 Vietnam</option>
+              <option value="thailand">🇹🇭 Thailand</option>
+              <option value="japan">🇯🇵 Japan</option>
+              <option value="singapore">🇸🇬 Singapore</option>
+              <option value="indonesia">🇮🇩 Indonesia (Bali)</option>
+              <option value="uae">🇦🇪 UAE (Dubai)</option>
+              <option value="india">🇮🇳 India</option>
+            </select>
+          </div>
+          <p id="tripSubtitleDisplay" class="text-xs text-rose-100 font-medium">Hanoi • Ha Long Bay • Hoi An • Late Nov 2026</p>
         </div>
       </div>
+
+      <!-- Controls & Auth -->
       <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
         <button id="googleAuthBtn" onclick="signInWithGoogle()" class="bg-white/20 hover:bg-white/30 text-white font-bold text-xs px-3 py-2 rounded-xl border border-white/20 transition flex items-center gap-1.5">
           🔑 Sign in with Google
@@ -40,28 +56,30 @@
           <span id="gpsDot" class="w-2 h-2 rounded-full bg-slate-300"></span>
           <span id="gpsBtnText">Share My Location</span>
         </button>
-        <!-- Active User Indicator -->
+        <!-- Role Indicator -->
         <div class="bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs">
           <span class="text-rose-100 font-medium">Role:</span>
           <span id="userRoleBadge" class="font-bold text-white uppercase text-[11px] bg-white/20 px-2 py-0.5 rounded">Guest (View Only)</span>
         </div>
-        <!-- Members Modal Button (Admin only) -->
+        <!-- Members Modal (Admin Only) -->
         <button id="openMembersModalBtn" onclick="openMembersModal()" class="hidden bg-white/15 hover:bg-white/25 text-white font-semibold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1">
           👥 Members (<span id="memberCountBadge">0</span>)
         </button>
-        <!-- Add Plan Button (Admin & Editor only) -->
+        <!-- Add Plan Button (Admin & Editor Only) -->
         <button id="openAddModalBtn" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm transition">
           + Add Plan
         </button>
       </div>
+
     </div>
   </header>
 
   <!-- Main Content -->
   <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-1 space-y-6">
 
-    <!-- Day Navigation & Destination Weather / Clock Banner -->
+    <!-- Day Navigation & Destination Weather / Live Dual Clock Banner -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+      
       <!-- Day Tabs -->
       <div class="md:col-span-7 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-2 overflow-x-auto custom-scrollbar">
         <div id="dayTabsContainer" class="flex items-center gap-2"></div>
@@ -70,7 +88,7 @@
         </button>
       </div>
 
-      <!-- Live Weather & Dual Clock Card -->
+      <!-- Live Weather & Live Dual Clock Card -->
       <div class="md:col-span-5 bg-gradient-to-br from-sky-500 to-blue-600 text-white p-3.5 rounded-2xl shadow-sm border border-sky-400 flex flex-col justify-between gap-2.5">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -81,33 +99,35 @@
                 <span id="weatherLiveBadge" class="text-[9px] bg-sky-400/50 px-1.5 py-0.2 rounded font-bold">LIVE</span>
               </div>
               <div class="flex items-baseline gap-2">
-                <span id="weatherTemp" class="text-2xl font-black">24°C</span>
+                <span id="weatherTemp" class="text-2xl font-black">28°C</span>
                 <span id="weatherCondition" class="text-xs font-medium text-sky-100">Partly Cloudy</span>
               </div>
             </div>
           </div>
           <div class="text-right text-[11px] text-sky-100 font-medium">
             <p id="weatherRain">Rain: 0 mm</p>
-            <p id="weatherWind">Wind: 7 km/h</p>
+            <p id="weatherWind">Wind: 5 km/h</p>
           </div>
         </div>
 
-        <!-- Real-Time Dual Clocks -->
+        <!-- Real-Time Dual Clocks: Local vs Destination -->
         <div class="pt-2 border-t border-sky-400/40 grid grid-cols-2 gap-2 text-xs">
-          <div class="bg-black/15 px-2.5 py-1.5 rounded-xl">
+          <div class="bg-black/20 backdrop-blur-sm px-2.5 py-1.5 rounded-xl border border-white/10">
             <p class="text-[10px] text-sky-200 font-bold uppercase tracking-wider">📍 Your Local Time</p>
             <p id="clockLocal" class="font-bold text-white text-sm font-mono mt-0.5">--:--:--</p>
           </div>
-          <div class="bg-black/15 px-2.5 py-1.5 rounded-xl">
-            <p class="text-[10px] text-sky-200 font-bold uppercase tracking-wider">🇻🇳 Vietnam Time (ICT)</p>
-            <p id="clockVietnam" class="font-bold text-white text-sm font-mono mt-0.5">--:--:--</p>
+          <div class="bg-black/20 backdrop-blur-sm px-2.5 py-1.5 rounded-xl border border-white/10">
+            <p id="clockDestinationLabel" class="text-[10px] text-sky-200 font-bold uppercase tracking-wider">🇻🇳 Vietnam Time (ICT)</p>
+            <p id="clockDestination" class="font-bold text-white text-sm font-mono mt-0.5">--:--:--</p>
           </div>
         </div>
       </div>
+
     </div>
 
     <!-- Map & Group Proximity Split -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
       <!-- Left Column: Interactive Map & Live Member Proximity -->
       <div class="lg:col-span-6 space-y-4">
         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm space-y-3">
@@ -152,9 +172,10 @@
           <span id="activeDayLabel" class="text-xs font-semibold text-slate-500">Day Schedule</span>
         </div>
 
-        <!-- Timeline Cards -->
+        <!-- Timeline Cards with Edit/Delete Controls -->
         <div id="itineraryList" class="space-y-3"></div>
       </div>
+
     </div>
   </main>
 
@@ -194,7 +215,7 @@
 
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Place / Activity Name</label>
-          <input type="text" id="itemName" required placeholder="e.g. Ha Long Bay Cruise" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl">
+          <input type="text" id="itemName" required placeholder="e.g. Tour Spot or Restaurant" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -271,24 +292,144 @@
   </div>
 
   <script>
-    // --- Initial Default Datasets ---
-    const DEFAULT_DAYS = [
-      { id: "day-1", name: "Day 1 (Nov 24)", date: "Hanoi & Old Quarter", city: "Hanoi", lat: 21.0285, lng: 105.8542 },
-      { id: "day-2", name: "Day 2 (Nov 25)", date: "Ha Long Bay Cruise", city: "Ha Long", lat: 20.9500, lng: 107.0733 },
-      { id: "day-3", name: "Day 3 (Nov 26)", date: "Hoi An Ancient Town", city: "Hoi An", lat: 15.8801, lng: 108.3380 }
-    ];
+    // --- 1. Supported Countries / Destinations Catalog ---
+    const DESTINATIONS = {
+      vietnam: {
+        flag: "🇻🇳",
+        title: "Vietnam Family Adventure",
+        subtitle: "Hanoi • Ha Long Bay • Hoi An • Late Nov 2026",
+        timezone: "Asia/Ho_Chi_Minh",
+        timeLabel: "🇻🇳 Vietnam Time (ICT)",
+        city: "Hanoi",
+        lat: 21.0285,
+        lng: 105.8542,
+        days: [
+          { id: "day-1", name: "Day 1 (Nov 24)", date: "Hanoi & Old Quarter", city: "Hanoi", lat: 21.0285, lng: 105.8542 },
+          { id: "day-2", name: "Day 2 (Nov 25)", date: "Ha Long Bay Cruise", city: "Ha Long", lat: 20.9500, lng: 107.0733 },
+          { id: "day-3", name: "Day 3 (Nov 26)", date: "Hoi An Ancient Town", city: "Hoi An", lat: 15.8801, lng: 108.3380 }
+        ],
+        items: [
+          { id: "it-1", dayId: "day-1", time: "10:30", name: "Flight Arrival at Noi Bai (HAN)", category: "transit", lat: 21.2212, lng: 105.8072, ticket: { pnr: "VN-5291", seat: "14A, 14B, 14C" }, notes: "Hotel pickup waiting at arrival pole 10." },
+          { id: "it-2", dayId: "day-1", time: "13:00", name: "Lunch at Bun Cha Huong Lien", category: "food", lat: 21.0168, lng: 105.8538, ticket: null, notes: "Famous Bourdain & Obama noodle table." },
+          { id: "it-3", dayId: "day-1", time: "16:00", name: "Hoan Kiem Lake & Red Bridge", category: "visit", lat: 21.0307, lng: 105.8524, ticket: { pnr: "TKT-882", seat: "Entry" }, notes: "Scenic afternoon walk across the bridge." },
+          { id: "it-4", dayId: "day-2", time: "11:30", name: "Board Ha Long Bay Cruise", category: "visit", lat: 20.9500, lng: 107.0733, ticket: { pnr: "CRUISE-90", seat: "Deluxe Balcony" }, notes: "Afternoon kayak tour through karst caves." },
+          { id: "it-5", dayId: "day-3", time: "18:00", name: "Hoi An Lantern Street & River Boat", category: "visit", lat: 15.8801, lng: 108.3380, ticket: null, notes: "Float flower paper lanterns for good luck." }
+        ]
+      },
+      thailand: {
+        flag: "🇹🇭",
+        title: "Thailand Holiday Trip",
+        subtitle: "Bangkok • Chiang Mai • Phuket",
+        timezone: "Asia/Bangkok",
+        timeLabel: "🇹🇭 Thailand Time (ICT)",
+        city: "Bangkok",
+        lat: 13.7563,
+        lng: 100.5018,
+        days: [
+          { id: "day-1", name: "Day 1", date: "Bangkok Temples & Chao Phraya", city: "Bangkok", lat: 13.7563, lng: 100.5018 },
+          { id: "day-2", name: "Day 2", date: "Chiang Mai Mountain Nature", city: "Chiang Mai", lat: 18.7883, lng: 98.9853 },
+          { id: "day-3", name: "Day 3", date: "Phuket Island & Beaches", city: "Phuket", lat: 7.8804, lng: 98.3923 }
+        ],
+        items: [
+          { id: "th-1", dayId: "day-1", time: "09:30", name: "Grand Palace & Wat Phra Kaew", category: "visit", lat: 13.7500, lng: 100.4913, ticket: { pnr: "BKK-101", seat: "Entry" }, notes: "Respectful attire required." },
+          { id: "th-2", dayId: "day-1", time: "13:00", name: "Pad Thai at Thip Samai", category: "food", lat: 13.7527, lng: 100.5048, ticket: null, notes: "Classic Bangkok street dining." }
+        ]
+      },
+      japan: {
+        flag: "🇯🇵",
+        title: "Japan Discovery Journey",
+        subtitle: "Tokyo • Kyoto • Osaka",
+        timezone: "Asia/Tokyo",
+        timeLabel: "🇯🇵 Japan Time (JST)",
+        city: "Tokyo",
+        lat: 35.6762,
+        lng: 139.6503,
+        days: [
+          { id: "day-1", name: "Day 1", date: "Tokyo Shinjuku & Shibuya", city: "Tokyo", lat: 35.6762, lng: 139.6503 },
+          { id: "day-2", name: "Day 2", date: "Kyoto Bamboo & Golden Pavilion", city: "Kyoto", lat: 35.0116, lng: 135.7681 },
+          { id: "day-3", name: "Day 3", date: "Osaka Dotonbori Street Food", city: "Osaka", lat: 34.6937, lng: 135.5023 }
+        ],
+        items: [
+          { id: "jp-1", dayId: "day-1", time: "10:00", name: "Senso-ji Temple & Asakusa", category: "visit", lat: 35.7148, lng: 139.7967, ticket: null, notes: "Explore traditional market street." },
+          { id: "jp-2", dayId: "day-1", time: "13:00", name: "Ramen at Ichiran Shibuya", category: "food", lat: 35.6618, lng: 139.7011, ticket: null, notes: "Tonkotsu ramen booth." }
+        ]
+      },
+      singapore: {
+        flag: "🇸🇬",
+        title: "Singapore City Highlights",
+        subtitle: "Marina Bay • Gardens by the Bay • Sentosa",
+        timezone: "Asia/Singapore",
+        timeLabel: "🇸🇬 Singapore Time (SGT)",
+        city: "Singapore",
+        lat: 1.3521,
+        lng: 103.8198,
+        days: [
+          { id: "day-1", name: "Day 1", date: "Marina Bay & Supertree Grove", city: "Singapore", lat: 1.2847, lng: 103.8646 },
+          { id: "day-2", name: "Day 2", date: "Sentosa Island Beach & Universal", city: "Sentosa", lat: 1.2494, lng: 103.8303 }
+        ],
+        items: [
+          { id: "sg-1", dayId: "day-1", time: "10:30", name: "Cloud Forest & Flower Dome", category: "visit", lat: 1.2816, lng: 103.8636, ticket: { pnr: "SG-884", seat: "Skyway" }, notes: "Indoor waterfall and skywalk." }
+        ]
+      },
+      indonesia: {
+        flag: "🇮🇩",
+        title: "Bali Island Getaway",
+        subtitle: "Ubud • Seminyak • Uluwatu",
+        timezone: "Asia/Makassar",
+        timeLabel: "🇮🇩 Bali Time (WITA)",
+        city: "Ubud",
+        lat: -8.5069,
+        lng: 115.2625,
+        days: [
+          { id: "day-1", name: "Day 1", date: "Ubud Culture & Rice Terraces", city: "Ubud", lat: -8.5069, lng: 115.2625 },
+          { id: "day-2", name: "Day 2", date: "Uluwatu Cliffs & Sunset", city: "Uluwatu", lat: -8.8291, lng: 115.0849 }
+        ],
+        items: [
+          { id: "id-1", dayId: "day-1", time: "09:30", name: "Tegallalang Rice Terrace Swing", category: "visit", lat: -8.4312, lng: 115.2801, ticket: null, notes: "Stunning valley views." }
+        ]
+      },
+      uae: {
+        flag: "🇦🇪",
+        title: "Dubai & Desert Journey",
+        subtitle: "Downtown Dubai • Marina • Desert Safari",
+        timezone: "Asia/Dubai",
+        timeLabel: "🇦🇪 UAE Time (GST)",
+        city: "Dubai",
+        lat: 25.2048,
+        lng: 55.2708,
+        days: [
+          { id: "day-1", name: "Day 1", date: "Downtown Dubai & Burj Khalifa", city: "Dubai", lat: 25.1972, lng: 55.2744 },
+          { id: "day-2", name: "Day 2", date: "Desert Safari & Bedouin Camp", city: "Dubai Desert", lat: 24.8315, lng: 55.4542 }
+        ],
+        items: [
+          { id: "ae-1", dayId: "day-1", time: "11:00", name: "Burj Khalifa Observation Deck", category: "visit", lat: 25.1972, lng: 55.2744, ticket: { pnr: "DXB-991", seat: "Level 124" }, notes: "Panoramas of Dubai skyline." }
+        ]
+      },
+      india: {
+        flag: "🇮🇳",
+        title: "Incredible India Heritage Trip",
+        subtitle: "Mysore • Coorg • Bangalore",
+        timezone: "Asia/Kolkata",
+        timeLabel: "🇮🇳 India Time (IST)",
+        city: "Mysuru",
+        lat: 12.2958,
+        lng: 76.6394,
+        days: [
+          { id: "day-1", name: "Day 1", date: "Mysore Palace & Chamundi Hills", city: "Mysuru", lat: 12.3051, lng: 76.6551 },
+          { id: "day-2", name: "Day 2", date: "Coorg Coffee Hills & Abbey Falls", city: "Madikeri", lat: 12.4244, lng: 75.7382 }
+        ],
+        items: [
+          { id: "in-1", dayId: "day-1", time: "10:00", name: "Mysore Amba Vilas Palace", category: "visit", lat: 12.3051, lng: 76.6551, ticket: { pnr: "IND-100", seat: "Main Gate" }, notes: "Illumination in the evening." }
+        ]
+      }
+    };
 
-    const DEFAULT_ITEMS = [
-      { id: "it-1", dayId: "day-1", time: "10:30", name: "Flight Arrival at Noi Bai (HAN)", category: "transit", lat: 21.2212, lng: 105.8072, ticket: { pnr: "VN-5291", seat: "14A, 14B, 14C" }, notes: "Hotel pickup waiting at arrival pole 10." },
-      { id: "it-2", dayId: "day-1", time: "13:00", name: "Lunch at Bun Cha Huong Lien", category: "food", lat: 21.0168, lng: 105.8538, ticket: null, notes: "Famous Bourdain & Obama noodle table." },
-      { id: "it-3", dayId: "day-1", time: "16:00", name: "Hoan Kiem Lake & Red Bridge", category: "visit", lat: 21.0307, lng: 105.8524, ticket: { pnr: "TKT-882", seat: "Entry" }, notes: "Scenic afternoon walk across the bridge." },
-      { id: "it-4", dayId: "day-2", time: "11:30", name: "Board Ha Long Bay Cruise", category: "visit", lat: 20.9500, lng: 107.0733, ticket: { pnr: "CRUISE-90", seat: "Deluxe Balcony" }, notes: "Afternoon kayak tour through karst caves." },
-      { id: "it-5", dayId: "day-3", time: "18:00", name: "Hoi An Lantern Street & River Boat", category: "visit", lat: 15.8801, lng: 108.3380, ticket: null, notes: "Float flower paper lanterns for good luck." }
-    ];
+    // --- 2. Application State ---
+    let activeDestKey = localStorage.getItem("travel_active_dest") || "vietnam";
+    let activeDest = DESTINATIONS[activeDestKey] || DESTINATIONS.vietnam;
 
-    // --- Application State ---
     const STATE = {
-      currentUserRole: "viewer", // Defaults to View-Only
+      currentUserRole: "viewer", // Starts in View-Only mode
       currentAuthEmail: null,
       isSharingGps: false,
       members: JSON.parse(localStorage.getItem("vietnam_family_members")) || [
@@ -298,29 +439,29 @@
         { id: "user-4", name: "Shashikala", email: "shashikala@gmail.com", role: "viewer", lat: 21.0270, lng: 105.8505, active: true }
       ],
       currentDayId: "day-1",
-      days: JSON.parse(localStorage.getItem("vietnam_itinerary_days")) || DEFAULT_DAYS,
-      items: JSON.parse(localStorage.getItem("vietnam_itinerary_items")) || DEFAULT_ITEMS
+      days: JSON.parse(localStorage.getItem(`travel_days_${activeDestKey}`)) || activeDest.days,
+      items: JSON.parse(localStorage.getItem(`travel_items_${activeDestKey}`)) || activeDest.items
     };
 
     let mapInstance = null;
     let markersLayer = null;
     let gpsWatchId = null;
 
-    // --- Live Dual Clocks (Local Device Time & Vietnam ICT UTC+7) ---
+    // --- 3. Live Dual Clock (Local Time & Destination Time) ---
     function updateLiveClocks() {
       const now = new Date();
-      
-      // User's Local Geolocation Time
-      const localFormatted = new Intl.DateTimeFormat([], {
+
+      // Device / Local Time
+      const localStr = new Intl.DateTimeFormat([], {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
         hour12: true
       }).format(now);
 
-      // Vietnam Time (Indochina Time, UTC+7)
-      const vietnamFormatted = new Intl.DateTimeFormat([], {
-        timeZone: "Asia/Ho_Chi_Minh",
+      // Destination Time
+      const destStr = new Intl.DateTimeFormat([], {
+        timeZone: activeDest.timezone,
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
@@ -328,14 +469,43 @@
       }).format(now);
 
       const localEl = document.getElementById("clockLocal");
-      const vnEl = document.getElementById("clockVietnam");
-      if (localEl) localEl.textContent = localFormatted;
-      if (vnEl) vnEl.textContent = vietnamFormatted;
+      const destEl = document.getElementById("clockDestination");
+      if (localEl) localEl.textContent = localStr;
+      if (destEl) destEl.textContent = destStr;
     }
     setInterval(updateLiveClocks, 1000);
     updateLiveClocks();
 
-    // --- Permissions Engine ---
+    // --- 4. Switch Destination Handler ---
+    const destSelector = document.getElementById("destinationSelector");
+    destSelector.value = activeDestKey;
+    destSelector.onchange = (e) => {
+      activeDestKey = e.target.value;
+      activeDest = DESTINATIONS[activeDestKey];
+      localStorage.setItem("travel_active_dest", activeDestKey);
+
+      // Update Header Text & Flag
+      document.getElementById("countryFlagIcon").textContent = activeDest.flag;
+      document.getElementById("tripTitleDisplay").textContent = activeDest.title;
+      document.getElementById("tripSubtitleDisplay").textContent = activeDest.subtitle;
+      document.getElementById("clockDestinationLabel").textContent = activeDest.timeLabel;
+
+      // Load or fallback days & items
+      STATE.days = JSON.parse(localStorage.getItem(`travel_days_${activeDestKey}`)) || activeDest.days;
+      STATE.items = JSON.parse(localStorage.getItem(`travel_items_${activeDestKey}`)) || activeDest.items;
+      STATE.currentDayId = STATE.days[0].id;
+
+      // Update Map view
+      if (mapInstance) {
+        mapInstance.setView([activeDest.lat, activeDest.lng], 12);
+      }
+
+      fetchWeatherForDay(STATE.days[0]);
+      render();
+      updateLiveClocks();
+    };
+
+    // --- 5. Permissions Engine ---
     window.evaluateUserPermissions = function(user) {
       if (!user || !user.email) {
         STATE.currentUserRole = "viewer";
@@ -373,7 +543,7 @@
       render();
     }
 
-    // --- Modal Management ---
+    // --- 6. Members Modal ---
     window.openMembersModal = function() {
       document.getElementById("membersModal").classList.remove("hidden");
       renderMembersList();
@@ -434,8 +604,8 @@
         name: name,
         email: email,
         role: role,
-        lat: 21.0285,
-        lng: 105.8542,
+        lat: activeDest.lat,
+        lng: activeDest.lng,
         active: true
       });
 
@@ -446,7 +616,7 @@
       render();
     };
 
-    // --- Edit & Delete Itinerary Stops ---
+    // --- 7. Edit & Delete Itinerary Stops ---
     window.editItem = function(id) {
       const item = STATE.items.find(i => i.id === id);
       if (!item) return;
@@ -455,8 +625,8 @@
       document.getElementById("modalTitle").textContent = "Edit Plan";
       document.getElementById("itemName").value = item.name;
       document.getElementById("itemTime").value = item.time;
-      document.getElementById("itemLat").value = item.lat || 21.0285;
-      document.getElementById("itemLng").value = item.lng || 105.8542;
+      document.getElementById("itemLat").value = item.lat || activeDest.lat;
+      document.getElementById("itemLng").value = item.lng || activeDest.lng;
       document.getElementById("ticketPnr").value = item.ticket?.pnr || "";
       document.getElementById("ticketSeat").value = item.ticket?.seat || "";
 
@@ -479,16 +649,15 @@
     window.deleteItem = function(id) {
       if (confirm("Remove this activity from the itinerary?")) {
         STATE.items = STATE.items.filter(i => i.id !== id);
-        localStorage.setItem("vietnam_itinerary_items", JSON.stringify(STATE.items));
+        localStorage.setItem(`travel_items_${activeDestKey}`, JSON.stringify(STATE.items));
         render();
         updateMap();
       }
     };
 
-    // Add Day Button
     document.getElementById("addDayBtn").onclick = () => {
       const nextNum = STATE.days.length + 1;
-      const baseDay = STATE.days[STATE.days.length - 1] || DEFAULT_DAYS[0];
+      const baseDay = STATE.days[STATE.days.length - 1] || activeDest.days[0];
       const newDay = {
         id: `day-${Date.now()}`,
         name: `Day ${nextNum}`,
@@ -498,12 +667,12 @@
         lng: baseDay.lng
       };
       STATE.days.push(newDay);
-      localStorage.setItem("vietnam_itinerary_days", JSON.stringify(STATE.days));
+      localStorage.setItem(`travel_days_${activeDestKey}`, JSON.stringify(STATE.days));
       STATE.currentDayId = newDay.id;
       render();
     };
 
-    // --- Distance Calculation (Haversine Formula) ---
+    // --- 8. Distance Calculation (Haversine Formula) ---
     function getDistanceMeters(lat1, lon1, lat2, lon2) {
       const R = 6371e3;
       const rad = Math.PI / 180;
@@ -521,7 +690,7 @@
       return `${(meters / 1000).toFixed(1)} km away`;
     }
 
-    // --- Weather Integration (Open-Meteo) ---
+    // --- 9. Weather Integration (Open-Meteo) ---
     async function fetchWeatherForDay(day) {
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${day.lat}&longitude=${day.lng}&current=temperature_2m,precipitation,weather_code,wind_speed_10m`;
@@ -530,9 +699,9 @@
         if (data && data.current) {
           const temp = Math.round(data.current.temperature_2m);
           const rain = data.current.precipitation || 0;
-          const wind = Math.round(data.current.wind_speed_10m || 7);
+          const wind = Math.round(data.current.wind_speed_10m || 5);
           
-          document.getElementById("weatherCity").textContent = `${day.city}, Vietnam`;
+          document.getElementById("weatherCity").textContent = `${day.city}, ${activeDest.title.split(' ')[0]}`;
           document.getElementById("weatherTemp").textContent = `${temp}°C`;
           document.getElementById("weatherRain").textContent = `Rain: ${rain} mm`;
           document.getElementById("weatherWind").textContent = `Wind: ${wind} km/h`;
@@ -557,10 +726,10 @@
       }
     }
 
-    // --- Initialize Leaflet Map ---
+    // --- 10. Leaflet Map ---
     function initMap() {
       if (mapInstance) return;
-      mapInstance = L.map('map').setView([21.0285, 105.8542], 12);
+      mapInstance = L.map('map').setView([activeDest.lat, activeDest.lng], 12);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap'
       }).addTo(mapInstance);
@@ -609,7 +778,6 @@
       }
     }
 
-    // --- Render Proximity List ---
     function renderProximity() {
       const container = document.getElementById("familyProximityList");
       container.innerHTML = "";
@@ -636,7 +804,7 @@
       });
     }
 
-    // --- GPS Toggle Handler ---
+    // --- 11. GPS Location Broadcasting ---
     const toggleGpsBtn = document.getElementById("toggleGpsBtn");
     const gpsDot = document.getElementById("gpsDot");
     const gpsBtnText = document.getElementById("gpsBtnText");
@@ -678,7 +846,7 @@
       }
     };
 
-    // --- Render Itinerary & Tabs ---
+    // --- 12. Render Day Tabs & Schedule Items ---
     function render() {
       // Day Tabs
       const tabs = document.getElementById("dayTabsContainer");
@@ -781,8 +949,8 @@
           item.time = document.getElementById("itemTime").value;
           item.name = document.getElementById("itemName").value.trim();
           item.category = document.querySelector('input[name="category"]:checked').value;
-          item.lat = parseFloat(document.getElementById("itemLat").value) || 21.0285;
-          item.lng = parseFloat(document.getElementById("itemLng").value) || 105.8542;
+          item.lat = parseFloat(document.getElementById("itemLat").value) || activeDest.lat;
+          item.lng = parseFloat(document.getElementById("itemLng").value) || activeDest.lng;
           item.ticket = ticketObj;
         }
       } else {
@@ -792,23 +960,24 @@
           time: document.getElementById("itemTime").value,
           name: document.getElementById("itemName").value.trim(),
           category: document.querySelector('input[name="category"]:checked').value,
-          lat: parseFloat(document.getElementById("itemLat").value) || 21.0285,
-          lng: parseFloat(document.getElementById("itemLng").value) || 105.8542,
+          lat: parseFloat(document.getElementById("itemLat").value) || activeDest.lat,
+          lng: parseFloat(document.getElementById("itemLng").value) || activeDest.lng,
           ticket: ticketObj
         });
       }
 
-      localStorage.setItem("vietnam_itinerary_items", JSON.stringify(STATE.items));
+      localStorage.setItem(`travel_items_${activeDestKey}`, JSON.stringify(STATE.items));
       document.getElementById("activityModal").classList.add("hidden");
       render();
     };
 
-    // Start App
+    // Initialize View
     initMap();
     fetchWeatherForDay(STATE.days[0]);
     evaluateUserPermissions(null);
   </script>
 
+  <!-- Firebase Auth Module -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
