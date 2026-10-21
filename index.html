@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vietnam Family Adventure - Live Map & Weather</title>
+  <title>Vietnam Family Adventure - Live Map, Weather & Dual Clock</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -60,34 +60,48 @@
   <!-- Main Content -->
   <main class="max-w-6xl mx-auto px-4 py-6 w-full flex-1 space-y-6">
 
-    <!-- Day Navigation & Destination Weather Banner -->
-    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+    <!-- Day Navigation & Destination Weather / Clock Banner -->
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
       <!-- Day Tabs -->
-      <div class="md:col-span-8 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-2 overflow-x-auto custom-scrollbar">
+      <div class="md:col-span-7 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-2 overflow-x-auto custom-scrollbar">
         <div id="dayTabsContainer" class="flex items-center gap-2"></div>
-        <button id="addDayBtn" class="hidden text-xs text-rose-600 hover:text-rose-700 font-bold whitespace-nowrap px-3 py-2 bg-rose-50 rounded-xl">
+        <button id="addDayBtn" class="hidden text-xs text-rose-600 hover:text-rose-700 font-bold whitespace-nowrap px-3 py-2 bg-rose-50 rounded-xl transition">
           + Add Day
         </button>
       </div>
 
-      <!-- Live Weather Card -->
-      <div class="md:col-span-4 bg-gradient-to-br from-sky-500 to-blue-600 text-white p-3.5 rounded-2xl shadow-sm border border-sky-400 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div id="weatherIcon" class="text-3xl">🌤️</div>
-          <div>
-            <div class="flex items-center gap-1.5">
-              <span id="weatherCity" class="text-xs font-bold uppercase tracking-wider text-sky-100">Hanoi, Vietnam</span>
-              <span id="weatherLiveBadge" class="text-[9px] bg-sky-400/50 px-1.5 py-0.2 rounded font-bold">LIVE</span>
-            </div>
-            <div class="flex items-baseline gap-2">
-              <span id="weatherTemp" class="text-2xl font-black">24°C</span>
-              <span id="weatherCondition" class="text-xs font-medium text-sky-100">Partly Cloudy</span>
+      <!-- Live Weather & Dual Clock Card -->
+      <div class="md:col-span-5 bg-gradient-to-br from-sky-500 to-blue-600 text-white p-3.5 rounded-2xl shadow-sm border border-sky-400 flex flex-col justify-between gap-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div id="weatherIcon" class="text-3xl">🌤️</div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span id="weatherCity" class="text-xs font-bold uppercase tracking-wider text-sky-100">Hanoi, Vietnam</span>
+                <span id="weatherLiveBadge" class="text-[9px] bg-sky-400/50 px-1.5 py-0.2 rounded font-bold">LIVE</span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span id="weatherTemp" class="text-2xl font-black">24°C</span>
+                <span id="weatherCondition" class="text-xs font-medium text-sky-100">Partly Cloudy</span>
+              </div>
             </div>
           </div>
+          <div class="text-right text-[11px] text-sky-100 font-medium">
+            <p id="weatherRain">Rain: 0 mm</p>
+            <p id="weatherWind">Wind: 7 km/h</p>
+          </div>
         </div>
-        <div class="text-right text-[11px] text-sky-100 font-medium">
-          <p id="weatherRain">Rain: 10%</p>
-          <p id="weatherWind">Wind: 12 km/h</p>
+
+        <!-- Real-Time Dual Clocks -->
+        <div class="pt-2 border-t border-sky-400/40 grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-black/15 px-2.5 py-1.5 rounded-xl">
+            <p class="text-[10px] text-sky-200 font-bold uppercase tracking-wider">📍 Your Local Time</p>
+            <p id="clockLocal" class="font-bold text-white text-sm font-mono mt-0.5">--:--:--</p>
+          </div>
+          <div class="bg-black/15 px-2.5 py-1.5 rounded-xl">
+            <p class="text-[10px] text-sky-200 font-bold uppercase tracking-wider">🇻🇳 Vietnam Time (ICT)</p>
+            <p id="clockVietnam" class="font-bold text-white text-sm font-mono mt-0.5">--:--:--</p>
+          </div>
         </div>
       </div>
     </div>
@@ -144,14 +158,16 @@
     </div>
   </main>
 
-  <!-- Add Activity Modal -->
+  <!-- Add / Edit Activity Modal -->
   <div id="activityModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-slate-100">
       <div class="bg-gradient-to-r from-rose-600 to-amber-600 px-6 py-4 text-white flex items-center justify-between">
-        <h3 class="font-bold text-base">Add New Plan</h3>
-        <button id="closeModalBtn" class="text-white/80 hover:text-white text-xl">&times;</button>
+        <h3 id="modalTitle" class="font-bold text-base">Add New Plan</h3>
+        <button id="closeModalBtn" class="text-white/80 hover:text-white text-xl leading-none">&times;</button>
       </div>
       <form id="activityForm" class="p-6 space-y-4">
+        <input type="hidden" id="editingItemId" value="">
+
         <div class="grid grid-cols-3 gap-2">
           <label class="cursor-pointer">
             <input type="radio" name="category" value="visit" class="peer sr-only" checked>
@@ -228,7 +244,7 @@
           <h3 class="font-bold text-base text-slate-800">Trip Members & Permissions</h3>
           <p class="text-xs text-slate-400">Match Gmail IDs to grant Editor or Admin rights</p>
         </div>
-        <button onclick="closeMembersModal()" class="text-slate-400 hover:text-slate-600 text-xl">&times;</button>
+        <button onclick="closeMembersModal()" class="text-slate-400 hover:text-slate-600 text-xl leading-none">&times;</button>
       </div>
 
       <!-- Add Member by Gmail Form -->
@@ -255,40 +271,73 @@
   </div>
 
   <script>
+    // --- Initial Default Datasets ---
+    const DEFAULT_DAYS = [
+      { id: "day-1", name: "Day 1 (Nov 24)", date: "Hanoi & Old Quarter", city: "Hanoi", lat: 21.0285, lng: 105.8542 },
+      { id: "day-2", name: "Day 2 (Nov 25)", date: "Ha Long Bay Cruise", city: "Ha Long", lat: 20.9500, lng: 107.0733 },
+      { id: "day-3", name: "Day 3 (Nov 26)", date: "Hoi An Ancient Town", city: "Hoi An", lat: 15.8801, lng: 108.3380 }
+    ];
+
+    const DEFAULT_ITEMS = [
+      { id: "it-1", dayId: "day-1", time: "10:30", name: "Flight Arrival at Noi Bai (HAN)", category: "transit", lat: 21.2212, lng: 105.8072, ticket: { pnr: "VN-5291", seat: "14A, 14B, 14C" }, notes: "Hotel pickup waiting at arrival pole 10." },
+      { id: "it-2", dayId: "day-1", time: "13:00", name: "Lunch at Bun Cha Huong Lien", category: "food", lat: 21.0168, lng: 105.8538, ticket: null, notes: "Famous Bourdain & Obama noodle table." },
+      { id: "it-3", dayId: "day-1", time: "16:00", name: "Hoan Kiem Lake & Red Bridge", category: "visit", lat: 21.0307, lng: 105.8524, ticket: { pnr: "TKT-882", seat: "Entry" }, notes: "Scenic afternoon walk across the bridge." },
+      { id: "it-4", dayId: "day-2", time: "11:30", name: "Board Ha Long Bay Cruise", category: "visit", lat: 20.9500, lng: 107.0733, ticket: { pnr: "CRUISE-90", seat: "Deluxe Balcony" }, notes: "Afternoon kayak tour through karst caves." },
+      { id: "it-5", dayId: "day-3", time: "18:00", name: "Hoi An Lantern Street & River Boat", category: "visit", lat: 15.8801, lng: 108.3380, ticket: null, notes: "Float flower paper lanterns for good luck." }
+    ];
+
     // --- Application State ---
     const STATE = {
-      currentUserRole: "viewer", // Defaults to viewer (View-Only)
+      currentUserRole: "viewer", // Defaults to View-Only
       currentAuthEmail: null,
       isSharingGps: false,
       members: JSON.parse(localStorage.getItem("vietnam_family_members")) || [
-        { id: "user-1", name: "Sunil Kumar", email: "mgssunil@gmail.com", role: "admin", lat: 21.0310, lng: 105.8520, active: true },
-        { id: "user-2", name: "Prathiksha", email: "bgprathiksha@gmail.com", role: "editor", lat: 21.0295, lng: 105.8540, active: true },
-        { id: "user-3", name: "Prakruthi", email: "bg.prakruthi90@gmail.com", role: "editor", lat: 21.0270, lng: 105.8505, active: true },
-        { id: "user-4", name: "Shashikala", email: "shashikalara1970@gmail.com", role: "viewer", lat: 21.0270, lng: 105.8505, active: true }
+        { id: "user-1", name: "Sunil Kumar", email: "sunilkumar@gmail.com", role: "admin", lat: 21.0310, lng: 105.8520, active: true },
+        { id: "user-2", name: "Prathiksha", email: "prathiksha@gmail.com", role: "editor", lat: 21.0295, lng: 105.8540, active: true },
+        { id: "user-3", name: "Prakruthi", email: "prakruthi@gmail.com", role: "editor", lat: 21.0270, lng: 105.8505, active: true },
+        { id: "user-4", name: "Shashikala", email: "shashikala@gmail.com", role: "viewer", lat: 21.0270, lng: 105.8505, active: true }
       ],
       currentDayId: "day-1",
-      days: [
-        { id: "day-1", name: "Day 1 (Nov 24)", date: "Hanoi & Old Quarter", city: "Hanoi", lat: 21.0285, lng: 105.8542 },
-        { id: "day-2", name: "Day 2 (Nov 25)", date: "Ha Long Bay Cruise", city: "Ha Long", lat: 20.9500, lng: 107.0733 },
-        { id: "day-3", name: "Day 3 (Nov 26)", date: "Hoi An Ancient Town", city: "Hoi An", lat: 15.8801, lng: 108.3380 }
-      ],
-      items: [
-        { id: "it-1", dayId: "day-1", time: "10:30", name: "Flight Arrival at Noi Bai (HAN)", category: "transit", lat: 21.2212, lng: 105.8072, ticket: { pnr: "VN-5291", seat: "14A, 14B, 14C" }, notes: "Hotel pickup waiting at arrival pole 10." },
-        { id: "it-2", dayId: "day-1", time: "13:00", name: "Lunch at Bun Cha Huong Lien", category: "food", lat: 21.0168, lng: 105.8538, ticket: null, notes: "Famous Bourdain & Obama noodle table." },
-        { id: "it-3", dayId: "day-1", time: "16:00", name: "Hoan Kiem Lake & Red Bridge", category: "visit", lat: 21.0307, lng: 105.8524, ticket: { pnr: "TKT-882", seat: "Entry" }, notes: "Scenic afternoon walk across the bridge." },
-        { id: "it-4", dayId: "day-2", time: "11:30", name: "Board Ha Long Bay Cruise", category: "visit", lat: 20.9500, lng: 107.0733, ticket: { pnr: "CRUISE-90", seat: "Deluxe Balcony" }, notes: "Afternoon kayak tour through karst caves." },
-        { id: "it-5", dayId: "day-3", time: "18:00", name: "Hoi An Lantern Street & River Boat", category: "visit", lat: 15.8801, lng: 108.3380, ticket: null, notes: "Float flower paper lanterns for good luck." }
-      ]
+      days: JSON.parse(localStorage.getItem("vietnam_itinerary_days")) || DEFAULT_DAYS,
+      items: JSON.parse(localStorage.getItem("vietnam_itinerary_items")) || DEFAULT_ITEMS
     };
 
     let mapInstance = null;
     let markersLayer = null;
     let gpsWatchId = null;
 
+    // --- Live Dual Clocks (Local Device Time & Vietnam ICT UTC+7) ---
+    function updateLiveClocks() {
+      const now = new Date();
+      
+      // User's Local Geolocation Time
+      const localFormatted = new Intl.DateTimeFormat([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+      }).format(now);
+
+      // Vietnam Time (Indochina Time, UTC+7)
+      const vietnamFormatted = new Intl.DateTimeFormat([], {
+        timeZone: "Asia/Ho_Chi_Minh",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+      }).format(now);
+
+      const localEl = document.getElementById("clockLocal");
+      const vnEl = document.getElementById("clockVietnam");
+      if (localEl) localEl.textContent = localFormatted;
+      if (vnEl) vnEl.textContent = vietnamFormatted;
+    }
+    setInterval(updateLiveClocks, 1000);
+    updateLiveClocks();
+
     // --- Permissions Engine ---
     window.evaluateUserPermissions = function(user) {
       if (!user || !user.email) {
-        // NOT logged in -> View-Only Mode
         STATE.currentUserRole = "viewer";
         STATE.currentAuthEmail = null;
         document.getElementById("userRoleBadge").textContent = "Guest (View Only)";
@@ -300,7 +349,6 @@
           STATE.currentUserRole = matched.role.toLowerCase();
           document.getElementById("userRoleBadge").textContent = `${matched.name} (${matched.role.toUpperCase()})`;
         } else {
-          // Logged in with an unlisted Gmail -> View Only
           STATE.currentUserRole = "viewer";
           document.getElementById("userRoleBadge").textContent = `${user.displayName || 'User'} (Viewer)`;
         }
@@ -313,22 +361,19 @@
       const isViewer = (STATE.currentUserRole === "viewer");
       const isAdmin = (STATE.currentUserRole === "admin");
 
-      // Hide or show "+ Add Plan"
       const addBtn = document.getElementById("openAddModalBtn");
       if (addBtn) addBtn.style.display = isViewer ? "none" : "block";
 
-      // Hide or show "Add Day"
       const addDayBtn = document.getElementById("addDayBtn");
       if (addDayBtn) addDayBtn.style.display = isViewer ? "none" : "block";
 
-      // Hide or show "Members" button (Admin only)
       const membersBtn = document.getElementById("openMembersModalBtn");
       if (membersBtn) membersBtn.style.display = isAdmin ? "flex" : "none";
 
       render();
     }
 
-    // --- Modal Functions ---
+    // --- Modal Management ---
     window.openMembersModal = function() {
       document.getElementById("membersModal").classList.remove("hidden");
       renderMembersList();
@@ -376,7 +421,6 @@
       render();
     };
 
-    // Add Member Form Listener
     document.getElementById("addMemberForm").onsubmit = (e) => {
       e.preventDefault();
       const name = document.getElementById("newMemberName").value.trim();
@@ -399,6 +443,63 @@
       document.getElementById("newMemberName").value = "";
       document.getElementById("newMemberEmail").value = "";
       renderMembersList();
+      render();
+    };
+
+    // --- Edit & Delete Itinerary Stops ---
+    window.editItem = function(id) {
+      const item = STATE.items.find(i => i.id === id);
+      if (!item) return;
+
+      document.getElementById("editingItemId").value = item.id;
+      document.getElementById("modalTitle").textContent = "Edit Plan";
+      document.getElementById("itemName").value = item.name;
+      document.getElementById("itemTime").value = item.time;
+      document.getElementById("itemLat").value = item.lat || 21.0285;
+      document.getElementById("itemLng").value = item.lng || 105.8542;
+      document.getElementById("ticketPnr").value = item.ticket?.pnr || "";
+      document.getElementById("ticketSeat").value = item.ticket?.seat || "";
+
+      const radio = document.querySelector(`input[name="category"][value="${item.category}"]`);
+      if (radio) radio.checked = true;
+
+      const select = document.getElementById("itemDaySelect");
+      select.innerHTML = "";
+      STATE.days.forEach(d => {
+        const opt = document.createElement("option");
+        opt.value = d.id;
+        opt.textContent = d.name;
+        if (d.id === item.dayId) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      document.getElementById("activityModal").classList.remove("hidden");
+    };
+
+    window.deleteItem = function(id) {
+      if (confirm("Remove this activity from the itinerary?")) {
+        STATE.items = STATE.items.filter(i => i.id !== id);
+        localStorage.setItem("vietnam_itinerary_items", JSON.stringify(STATE.items));
+        render();
+        updateMap();
+      }
+    };
+
+    // Add Day Button
+    document.getElementById("addDayBtn").onclick = () => {
+      const nextNum = STATE.days.length + 1;
+      const baseDay = STATE.days[STATE.days.length - 1] || DEFAULT_DAYS[0];
+      const newDay = {
+        id: `day-${Date.now()}`,
+        name: `Day ${nextNum}`,
+        date: `Schedule for Day ${nextNum}`,
+        city: baseDay.city,
+        lat: baseDay.lat,
+        lng: baseDay.lng
+      };
+      STATE.days.push(newDay);
+      localStorage.setItem("vietnam_itinerary_days", JSON.stringify(STATE.days));
+      STATE.currentDayId = newDay.id;
       render();
     };
 
@@ -429,7 +530,7 @@
         if (data && data.current) {
           const temp = Math.round(data.current.temperature_2m);
           const rain = data.current.precipitation || 0;
-          const wind = Math.round(data.current.wind_speed_10m || 10);
+          const wind = Math.round(data.current.wind_speed_10m || 7);
           
           document.getElementById("weatherCity").textContent = `${day.city}, Vietnam`;
           document.getElementById("weatherTemp").textContent = `${temp}°C`;
@@ -466,7 +567,6 @@
       markersLayer = L.layerGroup().addTo(mapInstance);
     }
 
-    // --- Update Map Markers ---
     function updateMap() {
       if (!markersLayer) return;
       markersLayer.clearLayers();
@@ -610,6 +710,8 @@
       const dayItems = STATE.items.filter(i => i.dayId === STATE.currentDayId);
       dayItems.sort((a, b) => a.time.localeCompare(b.time));
 
+      const canEdit = (STATE.currentUserRole === "admin" || STATE.currentUserRole === "editor");
+
       dayItems.forEach(item => {
         const card = document.createElement("div");
         card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow transition space-y-2 cursor-pointer";
@@ -618,7 +720,17 @@
         card.innerHTML = `
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">⏰ ${item.time}</span>
-            <span class="text-xs font-bold text-rose-600">${item.category.toUpperCase()}</span>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-rose-600">${item.category.toUpperCase()}</span>
+              ${canEdit ? `
+                <button onclick="event.stopPropagation(); editItem('${item.id}')" class="text-xs text-blue-600 hover:text-blue-800 font-semibold px-2 py-0.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition" title="Edit stop">
+                  ✏️ Edit
+                </button>
+                <button onclick="event.stopPropagation(); deleteItem('${item.id}')" class="text-xs text-rose-500 hover:text-rose-700 font-semibold px-2 py-0.5 bg-rose-50 hover:bg-rose-100 rounded-lg transition" title="Delete stop">
+                  🗑️
+                </button>
+              ` : ''}
+            </div>
           </div>
           <h4 class="text-sm font-bold text-slate-900">${item.name}</h4>
           ${item.notes ? `<p class="text-xs text-slate-500">${item.notes}</p>` : ''}
@@ -639,6 +751,9 @@
 
     // Modal Events
     document.getElementById("openAddModalBtn").onclick = () => {
+      document.getElementById("editingItemId").value = "";
+      document.getElementById("modalTitle").textContent = "Add New Plan";
+      document.getElementById("activityForm").reset();
       const select = document.getElementById("itemDaySelect");
       select.innerHTML = "";
       STATE.days.forEach(d => {
@@ -655,33 +770,49 @@
 
     document.getElementById("activityForm").onsubmit = (e) => {
       e.preventDefault();
+      const editId = document.getElementById("editingItemId").value;
       const pnr = document.getElementById("ticketPnr").value.trim();
-      STATE.items.push({
-        id: `it-${Date.now()}`,
-        dayId: document.getElementById("itemDaySelect").value,
-        time: document.getElementById("itemTime").value,
-        name: document.getElementById("itemName").value.trim(),
-        category: document.querySelector('input[name="category"]:checked').value,
-        lat: parseFloat(document.getElementById("itemLat").value) || 21.0285,
-        lng: parseFloat(document.getElementById("itemLng").value) || 105.8542,
-        ticket: pnr ? { pnr, seat: document.getElementById("ticketSeat").value.trim() } : null
-      });
+      const ticketObj = pnr ? { pnr, seat: document.getElementById("ticketSeat").value.trim() } : null;
+
+      if (editId) {
+        const item = STATE.items.find(i => i.id === editId);
+        if (item) {
+          item.dayId = document.getElementById("itemDaySelect").value;
+          item.time = document.getElementById("itemTime").value;
+          item.name = document.getElementById("itemName").value.trim();
+          item.category = document.querySelector('input[name="category"]:checked').value;
+          item.lat = parseFloat(document.getElementById("itemLat").value) || 21.0285;
+          item.lng = parseFloat(document.getElementById("itemLng").value) || 105.8542;
+          item.ticket = ticketObj;
+        }
+      } else {
+        STATE.items.push({
+          id: `it-${Date.now()}`,
+          dayId: document.getElementById("itemDaySelect").value,
+          time: document.getElementById("itemTime").value,
+          name: document.getElementById("itemName").value.trim(),
+          category: document.querySelector('input[name="category"]:checked').value,
+          lat: parseFloat(document.getElementById("itemLat").value) || 21.0285,
+          lng: parseFloat(document.getElementById("itemLng").value) || 105.8542,
+          ticket: ticketObj
+        });
+      }
+
+      localStorage.setItem("vietnam_itinerary_items", JSON.stringify(STATE.items));
       document.getElementById("activityModal").classList.add("hidden");
       render();
     };
 
-    // Start App in View-Only mode by default
+    // Start App
     initMap();
     fetchWeatherForDay(STATE.days[0]);
     evaluateUserPermissions(null);
   </script>
 
   <script type="module">
-    // 1. Imports from Firebase CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 
-    // 2. Your Firebase Configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAAkAIIsAjPIDTjn7JHnSbABzg8FJsC_G4",
       authDomain: "vietnam-travel-app-66ce8.firebaseapp.com",
@@ -692,12 +823,10 @@
       measurementId: "G-TFJK3880E7"
     };
 
-    // 3. Initialize App and Services
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // 4. Sign-In Function
     async function signInWithGoogle() {
       try {
         const result = await signInWithPopup(auth, provider);
@@ -712,7 +841,6 @@
       }
     }
 
-    // 5. Sign-Out Function
     async function logOut() {
       try {
         await signOut(auth);
@@ -725,7 +853,6 @@
       }
     }
 
-    // 6. Listen for Login State
     onAuthStateChanged(auth, (user) => {
       const authBtn = document.getElementById("googleAuthBtn");
       if (!authBtn) return;
