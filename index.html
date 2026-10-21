@@ -39,10 +39,7 @@
                 <input type="text" id="countrySearchInput" placeholder="Search country..." value="Vietnam" class="bg-transparent text-white font-bold text-xs placeholder:text-rose-200/70 focus:outline-none w-32 sm:w-44">
                 <button id="clearCountrySearch" class="text-white/60 hover:text-white text-xs ml-1 leading-none" title="Clear">&times;</button>
               </div>
-              <!-- Autocomplete Suggestion Dropdown -->
-              <div id="countryDropdownList" class="absolute top-full left-0 mt-1.5 w-64 max-h-72 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-100 overflow-y-auto hidden z-50 py-1 divide-y divide-slate-100 text-xs custom-scrollbar">
-                <!-- Dynamically populated -->
-              </div>
+              <div id="countryDropdownList" class="absolute top-full left-0 mt-1.5 w-64 max-h-72 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-100 overflow-y-auto hidden z-50 py-1 divide-y divide-slate-100 text-xs custom-scrollbar"></div>
             </div>
           </div>
           <p id="tripSubtitleDisplay" class="text-xs text-rose-100 font-medium">Hanoi • Ha Long Bay • Hoi An • Late Nov 2026</p>
@@ -54,21 +51,17 @@
         <button id="googleAuthBtn" onclick="signInWithGoogle()" class="bg-white/20 hover:bg-white/30 text-white font-bold text-xs px-3 py-2 rounded-xl border border-white/20 transition flex items-center gap-1.5">
           🔑 Sign in with Google
         </button>
-        <!-- Live GPS Toggle -->
         <button id="toggleGpsBtn" class="bg-white/20 hover:bg-white/30 text-white font-bold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1.5 border border-white/20">
           <span id="gpsDot" class="w-2 h-2 rounded-full bg-slate-300"></span>
           <span id="gpsBtnText">Share My Location</span>
         </button>
-        <!-- Role Indicator -->
         <div class="bg-black/20 backdrop-blur-md px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs">
           <span class="text-rose-100 font-medium">Role:</span>
           <span id="userRoleBadge" class="font-bold text-white uppercase text-[11px] bg-white/20 px-2 py-0.5 rounded">Guest (View Only)</span>
         </div>
-        <!-- Members Modal (Admin Only) -->
         <button id="openMembersModalBtn" onclick="openMembersModal()" class="hidden bg-white/15 hover:bg-white/25 text-white font-semibold text-xs px-3 py-2 rounded-xl transition flex items-center gap-1">
           👥 Members (<span id="memberCountBadge">0</span>)
         </button>
-        <!-- Add Plan Button (Admin & Editor Only) -->
         <button id="openAddModalBtn" class="hidden bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm transition">
           + Add Plan
         </button>
@@ -82,8 +75,6 @@
 
     <!-- Day Navigation & Destination Weather / Live Dual Clock Banner -->
     <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
-      
-      <!-- Day Tabs -->
       <div class="md:col-span-7 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-2 overflow-x-auto custom-scrollbar">
         <div id="dayTabsContainer" class="flex items-center gap-2"></div>
         <button id="addDayBtn" class="hidden text-xs text-rose-600 hover:text-rose-700 font-bold whitespace-nowrap px-3 py-2 bg-rose-50 rounded-xl transition">
@@ -91,7 +82,6 @@
         </button>
       </div>
 
-      <!-- Live Weather & Live Dual Clock Card -->
       <div class="md:col-span-5 bg-gradient-to-br from-sky-500 to-blue-600 text-white p-3.5 rounded-2xl shadow-sm border border-sky-400 flex flex-col justify-between gap-2.5">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -113,7 +103,6 @@
           </div>
         </div>
 
-        <!-- Real-Time Dual Clocks: Local vs Destination -->
         <div class="pt-2 border-t border-sky-400/40 grid grid-cols-2 gap-2 text-xs">
           <div class="bg-black/20 backdrop-blur-sm px-2.5 py-1.5 rounded-xl border border-white/10">
             <p class="text-[10px] text-sky-200 font-bold uppercase tracking-wider">📍 Your Local Time</p>
@@ -125,35 +114,22 @@
           </div>
         </div>
       </div>
-
     </div>
 
     <!-- Weather Legend Bar -->
     <div class="bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between flex-wrap gap-2 text-xs">
       <span class="font-bold text-slate-500 uppercase tracking-wider text-[11px]">🎨 Itinerary Weather Palette:</span>
       <div class="flex items-center gap-3 flex-wrap text-[11px] font-semibold">
-        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-800">
-          ☀️ Sunny / Hot
-        </span>
-        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-sky-50 border border-sky-300 text-sky-800">
-          🌧️ Rainy
-        </span>
-        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800">
-          ❄️ Snowy / Cold
-        </span>
-        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-purple-50 border border-purple-200 text-purple-800">
-          🌫️ Humid
-        </span>
-        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800">
-          🌤️ Clear & Cool
-        </span>
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-800">☀️ Sunny / Hot</span>
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-sky-50 border border-sky-300 text-sky-800">🌧️ Rainy</span>
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800">❄️ Snowy / Cold</span>
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-purple-50 border border-purple-200 text-purple-800">🌫️ Humid</span>
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800">🌤️ Clear & Cool</span>
       </div>
     </div>
 
     <!-- Map & Group Proximity Split -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      
-      <!-- Left Column: Interactive Map & Live Member Proximity -->
       <div class="lg:col-span-6 space-y-4">
         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between">
@@ -175,7 +151,6 @@
           </div>
         </div>
 
-        <!-- Family Live Proximity Tracker -->
         <div class="bg-white p-4 rounded-3xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between">
             <h4 class="text-xs font-bold uppercase text-slate-500 tracking-wider">Family Live Locations</h4>
@@ -185,7 +160,7 @@
         </div>
       </div>
 
-      <!-- Right Column: Day Schedule with Weather-Colored Tiles -->
+      <!-- Right Column: Day Schedule -->
       <div class="lg:col-span-6 space-y-4">
         <div class="flex items-center justify-between gap-2 flex-wrap">
           <div class="flex items-center gap-1.5">
@@ -197,14 +172,12 @@
           <span id="activeDayLabel" class="text-xs font-semibold text-slate-500">Day Schedule</span>
         </div>
 
-        <!-- Timeline Cards with Live Mini Weather & Dynamic Color Tiles -->
         <div id="itineraryList" class="space-y-3"></div>
       </div>
-
     </div>
   </main>
 
-  <!-- Add / Edit Activity Modal -->
+  <!-- Add / Edit Activity Modal (With Autocomplete & Link Parser) -->
   <div id="activityModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto border border-slate-100">
       <div class="bg-gradient-to-r from-rose-600 to-amber-600 px-6 py-4 text-white flex items-center justify-between">
@@ -214,6 +187,7 @@
       <form id="activityForm" class="p-6 space-y-4">
         <input type="hidden" id="editingItemId" value="">
 
+        <!-- Category Selector -->
         <div class="grid grid-cols-3 gap-2">
           <label class="cursor-pointer">
             <input type="radio" name="category" value="visit" class="peer sr-only" checked>
@@ -238,11 +212,13 @@
           </label>
         </div>
 
+        <!-- Place Name -->
         <div>
           <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Place / Activity Name</label>
-          <input type="text" id="itemName" required placeholder="e.g. Tour Spot or Restaurant" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl">
+          <input type="text" id="itemName" required placeholder="e.g. Tour Spot or Restaurant" class="w-full px-3.5 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500">
         </div>
 
+        <!-- Time & Day -->
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Time</label>
@@ -254,15 +230,31 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Latitude</label>
-            <input type="number" step="0.0001" id="itemLat" value="21.0285" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+        <!-- Smart Location Selector: Auto-Suggest & Link Parser -->
+        <div class="space-y-1 relative">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold uppercase text-slate-500">
+              📍 Location / Address or Google Maps Link
+            </label>
+            <span id="locationDetectBadge" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-300 hidden">
+              ✓ Location Set
+            </span>
           </div>
-          <div>
-            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Longitude</label>
-            <input type="number" step="0.0001" id="itemLng" value="105.8542" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+
+          <div class="relative">
+            <input type="text" id="locationSearchInput" placeholder="Type place name or paste Google Maps URL / coordinates..." class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+            
+            <!-- Autocomplete Suggestion Results -->
+            <div id="locationSuggestionsList" class="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto hidden divide-y divide-slate-100 text-xs custom-scrollbar"></div>
           </div>
+          
+          <p class="text-[10px] text-slate-400">
+            💡 Type to get auto-suggestions, or paste a Google Maps URL or "lat, lng" coordinates.
+          </p>
+
+          <!-- Hidden Latitude and Longitude to preserve app engine seamlessly -->
+          <input type="hidden" id="itemLat" value="21.0285">
+          <input type="hidden" id="itemLng" value="105.8542">
         </div>
 
         <!-- Ticket Drawer -->
@@ -293,7 +285,6 @@
         <button onclick="closeMembersModal()" class="text-slate-400 hover:text-slate-600 text-xl leading-none">&times;</button>
       </div>
 
-      <!-- Add Member by Gmail Form -->
       <form id="addMemberForm" class="space-y-2 pt-2 border-t border-slate-100">
         <div class="grid grid-cols-2 gap-2">
           <input type="text" id="newMemberName" placeholder="Name (e.g. Priya)" required class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -311,13 +302,12 @@
         </div>
       </form>
 
-      <!-- List of authorized members -->
       <div id="membersList" class="space-y-2 max-h-60 overflow-y-auto"></div>
     </div>
   </div>
 
   <script>
-    // --- 1. Global Tourist Countries Catalog (Comprehensive Auto-Fetch Base) ---
+    // --- 1. Global Tourist Countries Catalog ---
     const DESTINATIONS = {
       vietnam: { flag: "🇻🇳", name: "Vietnam", title: "Vietnam Family Adventure", subtitle: "Hanoi • Ha Long Bay • Hoi An", timezone: "Asia/Ho_Chi_Minh", timeLabel: "🇻🇳 Vietnam Time (ICT)", city: "Hanoi", lat: 21.0285, lng: 105.8542,
         days: [
@@ -381,22 +371,6 @@
       india: { flag: "🇮🇳", name: "India", title: "Incredible India Heritage Trip", subtitle: "Mysore • Coorg • Bangalore", timezone: "Asia/Kolkata", timeLabel: "🇮🇳 India Time (IST)", city: "Mysuru", lat: 12.2958, lng: 76.6394,
         days: [{ id: "day-1", name: "Day 1", date: "Mysore Palace & Chamundi Hills", city: "Mysuru", lat: 12.3051, lng: 76.6551 }],
         items: [{ id: "in-1", dayId: "day-1", time: "10:00", name: "Mysore Amba Vilas Palace", category: "visit", lat: 12.3051, lng: 76.6551, ticket: { pnr: "IND-100", seat: "Main Gate" }, notes: "Illumination in the evening." }]
-      },
-      maldives: { flag: "🇲🇻", name: "Maldives", title: "Maldives Atoll Paradise", subtitle: "Male • Overwater Villas", timezone: "Indian/Maldives", timeLabel: "🇲🇻 Maldives Time (MVT)", city: "Male", lat: 4.1755, lng: 73.5093,
-        days: [{ id: "day-1", name: "Day 1", date: "Atoll Lagoon & Snorkel Tour", city: "Male", lat: 4.1755, lng: 73.5093 }],
-        items: [{ id: "mv-1", dayId: "day-1", time: "10:00", name: "Coral Reef Snorkel Safari", category: "visit", lat: 4.1800, lng: 73.5100, ticket: null, notes: "Manta rays and reef sharks." }]
-      },
-      spain: { flag: "🇪🇸", name: "Spain", title: "Spanish Wonders & Tapas", subtitle: "Barcelona • Madrid • Seville", timezone: "Europe/Madrid", timeLabel: "🇪🇸 Spain Time (CET)", city: "Barcelona", lat: 41.3879, lng: 2.16992,
-        days: [{ id: "day-1", name: "Day 1", date: "Sagrada Familia & Gothic Quarter", city: "Barcelona", lat: 41.3879, lng: 2.16992 }],
-        items: [{ id: "es-1", dayId: "day-1", time: "10:00", name: "Basílica de la Sagrada Família", category: "visit", lat: 41.4036, lng: 2.1744, ticket: { pnr: "BCN-772", seat: "Tower" }, notes: "Gaudí masterpiece." }]
-      },
-      greece: { flag: "🇬🇷", name: "Greece", title: "Aegean Islands & Antiquities", subtitle: "Athens • Santorini • Mykonos", timezone: "Europe/Athens", timeLabel: "🇬🇷 Greece Time (EET)", city: "Athens", lat: 37.9838, lng: 23.7275,
-        days: [{ id: "day-1", name: "Day 1", date: "Acropolis & Plaka Old Quarter", city: "Athens", lat: 37.9838, lng: 23.7275 }],
-        items: [{ id: "gr-1", dayId: "day-1", time: "09:00", name: "Parthenon at the Acropolis", category: "visit", lat: 37.9715, lng: 23.7267, ticket: null, notes: "Ancient hilltop monument." }]
-      },
-      uk: { flag: "🇬🇧", name: "United Kingdom", title: "British Heritage & Royal City", subtitle: "London • Edinburgh • Bath", timezone: "Europe/London", timeLabel: "🇬🇧 UK Time (GMT)", city: "London", lat: 51.5074, lng: -0.1278,
-        days: [{ id: "day-1", name: "Day 1", date: "Westminster & Thames Walk", city: "London", lat: 51.5074, lng: -0.1278 }],
-        items: [{ id: "uk-1", dayId: "day-1", time: "10:00", name: "Big Ben & Westminster Abbey", category: "visit", lat: 51.4993, lng: -0.1273, ticket: null, notes: "Iconic London clock tower." }]
       }
     };
 
@@ -422,15 +396,12 @@
     let mapInstance = null;
     let markersLayer = null;
     let gpsWatchId = null;
-    
-    // In-memory Stop Weather Cache: `${lat},${lng}` => { temp, rain, humidity, code, condition, type }
     const stopWeatherCache = {};
 
     // --- 3. Live Dual Clock (Local Time & Destination Time) ---
     function updateLiveClocks() {
       const now = new Date();
 
-      // Device / Local Time
       const localStr = new Intl.DateTimeFormat([], {
         hour: "2-digit",
         minute: "2-digit",
@@ -438,7 +409,6 @@
         hour12: true
       }).format(now);
 
-      // Destination Time
       const destStr = new Intl.DateTimeFormat([], {
         timeZone: activeDest.timezone || "Asia/Ho_Chi_Minh",
         hour: "2-digit",
@@ -455,7 +425,7 @@
     setInterval(updateLiveClocks, 1000);
     updateLiveClocks();
 
-    // --- 4. Searchable Country Autocomplete & Geocoding Fetcher ---
+    // --- 4. Country Search Autocomplete ---
     const countrySearchInput = document.getElementById("countrySearchInput");
     const countryDropdownList = document.getElementById("countryDropdownList");
     const clearCountrySearch = document.getElementById("clearCountrySearch");
@@ -479,7 +449,7 @@
               <span class="text-base">${item.flag}</span>
               <div>
                 <p class="font-bold text-slate-800">${item.name}</p>
-                <p class="text-[10px] text-slate-400">${item.city} • ${item.timeLabel.split(' ')[2] || ''}</p>
+                <p class="text-[10px] text-slate-400">${item.city}</p>
               </div>
             </div>
             <span class="text-[10px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-lg">Select</span>
@@ -488,48 +458,38 @@
           countryDropdownList.appendChild(div);
         });
       } else {
-        // Fallback option: Live fetch any custom location from Open-Meteo Geocoding
         const fallbackDiv = document.createElement("div");
         fallbackDiv.className = "px-3.5 py-2.5 text-center";
         fallbackDiv.innerHTML = `
-          <p class="text-xs text-slate-500 mb-1.5">No preset country found for "${filterText}"</p>
+          <p class="text-xs text-slate-500 mb-1.5">No preset for "${filterText}"</p>
           <button id="fetchCustomCountryBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition">
-            🔍 Search Worldwide via Geocoding
+            🔍 Search Worldwide Geocoding
           </button>
         `;
         countryDropdownList.appendChild(fallbackDiv);
-
         document.getElementById("fetchCustomCountryBtn").onclick = () => searchWorldwideGeocoding(filterText);
       }
 
       countryDropdownList.classList.remove("hidden");
     }
 
-    countrySearchInput.onfocus = () => {
-      renderCountryDropdown(countrySearchInput.value);
-    };
-
+    countrySearchInput.onfocus = () => renderCountryDropdown(countrySearchInput.value);
     countrySearchInput.oninput = (e) => {
-      const val = e.target.value;
-      clearCountrySearch.classList.toggle("hidden", !val);
-      renderCountryDropdown(val);
+      clearCountrySearch.classList.toggle("hidden", !e.target.value);
+      renderCountryDropdown(e.target.value);
     };
-
     clearCountrySearch.onclick = () => {
       countrySearchInput.value = "";
       clearCountrySearch.classList.add("hidden");
       renderCountryDropdown("");
       countrySearchInput.focus();
     };
-
-    // Close suggestions when clicking outside
     document.addEventListener("click", (e) => {
       if (!countrySearchInput.contains(e.target) && !countryDropdownList.contains(e.target)) {
         countryDropdownList.classList.add("hidden");
       }
     });
 
-    // Select Destination Handler
     function selectDestination(key) {
       activeDestKey = key;
       activeDest = DESTINATIONS[key];
@@ -539,18 +499,15 @@
       countryDropdownList.classList.add("hidden");
       clearCountrySearch.classList.remove("hidden");
 
-      // Update Header Text & Flag
       document.getElementById("countryFlagIcon").textContent = activeDest.flag;
       document.getElementById("tripTitleDisplay").textContent = activeDest.title;
       document.getElementById("tripSubtitleDisplay").textContent = activeDest.subtitle;
       document.getElementById("clockDestinationLabel").textContent = activeDest.timeLabel;
 
-      // Load days & items
       STATE.days = JSON.parse(localStorage.getItem(`travel_days_${activeDestKey}`)) || activeDest.days;
       STATE.items = JSON.parse(localStorage.getItem(`travel_items_${activeDestKey}`)) || activeDest.items;
       STATE.currentDayId = STATE.days[0].id;
 
-      // Update Map view
       if (mapInstance) {
         mapInstance.setView([activeDest.lat, activeDest.lng], 11);
       }
@@ -560,7 +517,6 @@
       updateLiveClocks();
     }
 
-    // Auto-fetch any worldwide country via Open-Meteo Geocoding
     async function searchWorldwideGeocoding(query) {
       if (!query || query.length < 2) return;
       try {
@@ -591,11 +547,10 @@
 
           selectDestination(customKey);
         } else {
-          alert(`No geocoding matches found for "${query}". Try another country.`);
+          alert(`No geocoding matches found for "${query}".`);
           countrySearchInput.value = activeDest.name;
         }
       } catch (err) {
-        console.error("Geocoding failed", err);
         alert("Could not fetch location data.");
         countrySearchInput.value = activeDest.name;
       }
@@ -712,7 +667,109 @@
       render();
     };
 
-    // --- 7. Edit & Delete Itinerary Stops ---
+    // --- 7. Smart Location Selector & Link Parser Logic ---
+    const locationSearchInput = document.getElementById("locationSearchInput");
+    const locationSuggestionsList = document.getElementById("locationSuggestionsList");
+    const locationDetectBadge = document.getElementById("locationDetectBadge");
+    let locationDebounceTimer = null;
+
+    // Parser for Google Maps URLs and direct "lat, lng" strings
+    function parseLocationUrlOrCoords(str) {
+      str = str.trim();
+
+      // Case A: Direct "lat, lng" e.g. "21.0285, 105.8542"
+      const directMatch = str.match(/^(-?\d+(\.\d+)?),\s*(-?\d+(\.\d+)?)$/);
+      if (directMatch) {
+        return { lat: parseFloat(directMatch[1]), lng: parseFloat(directMatch[3]), label: "Direct Coordinates" };
+      }
+
+      // Case B: Google Maps /@lat,lng,...
+      const atMatch = str.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if (atMatch) {
+        return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]), label: "Google Maps Pin" };
+      }
+
+      // Case C: Google Maps query q=lat,lng
+      const qMatch = str.match(/[?&](?:q|query|ll)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if (qMatch) {
+        return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]), label: "Google Maps Query" };
+      }
+
+      return null;
+    }
+
+    function setCoordinates(lat, lng, label = "") {
+      document.getElementById("itemLat").value = lat;
+      document.getElementById("itemLng").value = lng;
+      locationDetectBadge.textContent = `✓ ${label || 'Location Set'} (${lat.toFixed(4)}, ${lng.toFixed(4)})`;
+      locationDetectBadge.classList.remove("hidden");
+    }
+
+    locationSearchInput.oninput = (e) => {
+      const query = e.target.value.trim();
+
+      // Check if user pasted a link or raw coordinates first
+      const parsed = parseLocationUrlOrCoords(query);
+      if (parsed) {
+        setCoordinates(parsed.lat, parsed.lng, parsed.label);
+        locationSuggestionsList.classList.add("hidden");
+        return;
+      }
+
+      // If typing a name, debounce and search places
+      clearTimeout(locationDebounceTimer);
+      if (query.length < 2) {
+        locationSuggestionsList.classList.add("hidden");
+        return;
+      }
+
+      locationDebounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=6&language=en&format=json`);
+          const data = await res.json();
+
+          locationSuggestionsList.innerHTML = "";
+          if (data && data.results && data.results.length > 0) {
+            data.results.forEach(place => {
+              const row = document.createElement("div");
+              row.className = "px-3.5 py-2 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition";
+              row.innerHTML = `
+                <div>
+                  <p class="font-bold text-slate-800">${place.name}</p>
+                  <p class="text-[10px] text-slate-400">${[place.admin1, place.country].filter(Boolean).join(", ")}</p>
+                </div>
+                <span class="text-[10px] text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded-lg">Select</span>
+              `;
+              row.onclick = () => {
+                locationSearchInput.value = `${place.name}, ${place.country || ''}`;
+                // Auto-fill place title if empty
+                const itemNameInput = document.getElementById("itemName");
+                if (!itemNameInput.value.trim()) {
+                  itemNameInput.value = place.name;
+                }
+                setCoordinates(place.latitude, place.longitude, place.name);
+                locationSuggestionsList.classList.add("hidden");
+              };
+              locationSuggestionsList.appendChild(row);
+            });
+            locationSuggestionsList.classList.remove("hidden");
+          } else {
+            locationSuggestionsList.innerHTML = `<div class="px-3.5 py-2 text-slate-400 text-center">No location found</div>`;
+            locationSuggestionsList.classList.remove("hidden");
+          }
+        } catch (err) {
+          console.warn("Location suggestion error", err);
+        }
+      }, 250);
+    };
+
+    document.addEventListener("click", (e) => {
+      if (!locationSearchInput.contains(e.target) && !locationSuggestionsList.contains(e.target)) {
+        locationSuggestionsList.classList.add("hidden");
+      }
+    });
+
+    // --- 8. Edit & Delete Itinerary Stops ---
     window.editItem = function(id) {
       const item = STATE.items.find(i => i.id === id);
       if (!item) return;
@@ -723,6 +780,11 @@
       document.getElementById("itemTime").value = item.time;
       document.getElementById("itemLat").value = item.lat || activeDest.lat;
       document.getElementById("itemLng").value = item.lng || activeDest.lng;
+      
+      // Fill Location field
+      locationSearchInput.value = item.name;
+      setCoordinates(item.lat || activeDest.lat, item.lng || activeDest.lng, item.name);
+
       document.getElementById("ticketPnr").value = item.ticket?.pnr || "";
       document.getElementById("ticketSeat").value = item.ticket?.seat || "";
 
@@ -768,7 +830,7 @@
       render();
     };
 
-    // --- 8. Distance Calculation (Haversine Formula) ---
+    // --- 9. Distance Calculation (Haversine Formula) ---
     function getDistanceMeters(lat1, lon1, lat2, lon2) {
       const R = 6371e3;
       const rad = Math.PI / 180;
@@ -786,7 +848,7 @@
       return `${(meters / 1000).toFixed(1)} km away`;
     }
 
-    // --- 9. City Weather Integration ---
+    // --- 10. Destination City Weather ---
     async function fetchWeatherForDay(day) {
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${day.lat}&longitude=${day.lng}&current=temperature_2m,precipitation,weather_code,wind_speed_10m`;
@@ -822,7 +884,7 @@
       }
     }
 
-    // --- 10. Per-Stop Live Weather & Color Tile Classifier ---
+    // --- 11. Per-Stop Mini Live Weather Classifier ---
     async function fetchWeatherForStop(lat, lng) {
       const cacheKey = `${lat.toFixed(3)},${lng.toFixed(3)}`;
       if (stopWeatherCache[cacheKey]) return stopWeatherCache[cacheKey];
@@ -838,8 +900,7 @@
           const code = data.current.weather_code;
           const humidity = data.current.relative_humidity_2m || 50;
 
-          // Weather Classification Engine
-          let type = "clear"; // default
+          let type = "clear";
           let label = `🌤️ Clear (${temp}°C)`;
           let cardClasses = "bg-emerald-50/70 border-emerald-300 hover:border-emerald-400";
           let badgeClasses = "bg-emerald-100 text-emerald-800 border border-emerald-300";
@@ -886,7 +947,7 @@
       };
     }
 
-    // --- 11. Leaflet Map with Esri World Street Tiles (English, Free, No Watermark) ---
+    // --- 12. Leaflet Map with Esri World Street Tiles (English, Free, No Watermark) ---
     function initMap() {
       if (mapInstance) return;
       mapInstance = L.map('map').setView([activeDest.lat, activeDest.lng], 12);
@@ -967,7 +1028,7 @@
       });
     }
 
-    // --- 12. GPS Location Broadcasting ---
+    // --- 13. GPS Location Broadcasting ---
     const toggleGpsBtn = document.getElementById("toggleGpsBtn");
     const gpsDot = document.getElementById("gpsDot");
     const gpsBtnText = document.getElementById("gpsBtnText");
@@ -1009,9 +1070,8 @@
       }
     };
 
-    // --- 13. Render Day Tabs & Schedule Items with Weather Color Tiles ---
+    // --- 14. Render Day Tabs & Schedule Items with Weather Color Tiles ---
     function render() {
-      // Day Tabs
       const tabs = document.getElementById("dayTabsContainer");
       tabs.innerHTML = "";
       STATE.days.forEach(day => {
@@ -1032,7 +1092,6 @@
         tabs.appendChild(btn);
       });
 
-      // Itinerary List
       const list = document.getElementById("itineraryList");
       list.innerHTML = "";
       const currentDay = STATE.days.find(d => d.id === STATE.currentDayId);
@@ -1045,7 +1104,6 @@
 
       dayItems.forEach(item => {
         const card = document.createElement("div");
-        // Initial soft state; dynamically updated when weather loads
         card.id = `card-${item.id}`;
         card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow transition-all duration-200 space-y-2 cursor-pointer";
         card.onclick = () => mapInstance.flyTo([item.lat, item.lng], 14);
@@ -1055,9 +1113,8 @@
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="text-xs font-bold text-slate-700 bg-white/80 border border-slate-200/80 px-2 py-0.5 rounded-md">⏰ ${item.time}</span>
               <span class="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200/60 px-2 py-0.5 rounded-md">${item.category.toUpperCase()}</span>
-              <!-- Mini Weather Widget Badge -->
               <span id="weather-badge-${item.id}" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1">
-                ⏳ Loading weather...
+                ⏳ Live weather...
               </span>
             </div>
             
@@ -1082,7 +1139,6 @@
             </div>
           ` : ''}
           
-          <!-- Google Maps Direct Navigation Link -->
           <div class="flex items-center justify-between pt-2 border-t border-slate-200/50 text-xs">
             <a href="https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 hover:underline">
               🗺️ Navigate in Google Maps
@@ -1092,7 +1148,6 @@
         `;
         list.appendChild(card);
 
-        // Fetch stop weather asynchronously & apply dynamic color theme
         fetchWeatherForStop(item.lat, item.lng).then(w => {
           const badge = document.getElementById(`weather-badge-${item.id}`);
           const targetCard = document.getElementById(`card-${item.id}`);
@@ -1116,6 +1171,14 @@
       document.getElementById("editingItemId").value = "";
       document.getElementById("modalTitle").textContent = "Add New Plan";
       document.getElementById("activityForm").reset();
+      
+      // Reset Location search field & badge
+      locationSearchInput.value = "";
+      locationSuggestionsList.classList.add("hidden");
+      locationDetectBadge.classList.add("hidden");
+      document.getElementById("itemLat").value = activeDest.lat;
+      document.getElementById("itemLng").value = activeDest.lng;
+
       const select = document.getElementById("itemDaySelect");
       select.innerHTML = "";
       STATE.days.forEach(d => {
@@ -1127,6 +1190,7 @@
       });
       document.getElementById("activityModal").classList.remove("hidden");
     };
+
     document.getElementById("closeModalBtn").onclick = () => document.getElementById("activityModal").classList.add("hidden");
     document.getElementById("cancelModalBtn").onclick = () => document.getElementById("activityModal").classList.add("hidden");
 
@@ -1136,6 +1200,9 @@
       const pnr = document.getElementById("ticketPnr").value.trim();
       const ticketObj = pnr ? { pnr, seat: document.getElementById("ticketSeat").value.trim() } : null;
 
+      const selectedLat = parseFloat(document.getElementById("itemLat").value) || activeDest.lat;
+      const selectedLng = parseFloat(document.getElementById("itemLng").value) || activeDest.lng;
+
       if (editId) {
         const item = STATE.items.find(i => i.id === editId);
         if (item) {
@@ -1143,8 +1210,8 @@
           item.time = document.getElementById("itemTime").value;
           item.name = document.getElementById("itemName").value.trim();
           item.category = document.querySelector('input[name="category"]:checked').value;
-          item.lat = parseFloat(document.getElementById("itemLat").value) || activeDest.lat;
-          item.lng = parseFloat(document.getElementById("itemLng").value) || activeDest.lng;
+          item.lat = selectedLat;
+          item.lng = selectedLng;
           item.ticket = ticketObj;
         }
       } else {
@@ -1154,8 +1221,8 @@
           time: document.getElementById("itemTime").value,
           name: document.getElementById("itemName").value.trim(),
           category: document.querySelector('input[name="category"]:checked').value,
-          lat: parseFloat(document.getElementById("itemLat").value) || activeDest.lat,
-          lng: parseFloat(document.getElementById("itemLng").value) || activeDest.lng,
+          lat: selectedLat,
+          lng: selectedLng,
           ticket: ticketObj
         });
       }
