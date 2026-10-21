@@ -172,7 +172,7 @@
           <span id="activeDayLabel" class="text-xs font-semibold text-slate-500">Day Schedule</span>
         </div>
 
-        <!-- Timeline Cards with Edit/Delete Controls -->
+        <!-- Timeline Cards with Edit/Delete Controls & Google Maps Link -->
         <div id="itineraryList" class="space-y-3"></div>
       </div>
 
@@ -726,22 +726,11 @@
       }
     }
 
-    // --- 10. Leaflet Map ---
-    // function initMap() {
-    //   if (mapInstance) return;
-    //   mapInstance = L.map('map').setView([activeDest.lat, activeDest.lng], 12);
-    //   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //     attribution: '&copy; OpenStreetMap'
-    //   }).addTo(mapInstance);
-    //   markersLayer = L.layerGroup().addTo(mapInstance);
-    // }
-    // --- Initialize Leaflet Map with English Global Tiles ---
-    // --- Initialize Leaflet Map with English Esri World Tiles (No API key needed) ---
+    // --- 10. Leaflet Map with Esri World Street Tiles (English, Free, No Watermark) ---
     function initMap() {
       if (mapInstance) return;
       mapInstance = L.map('map').setView([activeDest.lat, activeDest.lng], 12);
 
-      // Esri World Street Map: 100% English globally, free, no watermark
       L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri',
         maxZoom: 18
@@ -922,6 +911,14 @@
               <span>Seat: ${item.ticket.seat}</span>
             </div>
           ` : ''}
+          
+          <!-- Google Maps Direct Navigation Link -->
+          <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+            <a href="https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 hover:underline">
+              🗺️ Navigate in Google Maps
+            </a>
+            <span class="text-[10px] text-slate-400">Tap card to focus map</span>
+          </div>
         `;
         list.appendChild(card);
       });
