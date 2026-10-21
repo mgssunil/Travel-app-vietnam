@@ -23,24 +23,27 @@
   <header class="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white shadow-lg sticky top-0 z-30">
     <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       
-      <!-- Brand & Trip Details -->
+      <!-- Brand & Searchable Country Selector -->
       <div class="flex items-center space-x-3">
-        <div id="countryFlagIcon" class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl shadow-inner">
+        <div id="countryFlagIcon" class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center text-xl shadow-inner shrink-0">
           🇻🇳
         </div>
         <div>
-          <div class="flex items-center gap-2">
-            <h1 id="tripTitleDisplay" class="text-lg sm:text-xl font-bold tracking-tight">Vietnam Family Adventure</h1>
-            <!-- Country Selector Dropdown -->
-            <select id="destinationSelector" class="bg-black/25 hover:bg-black/35 text-white font-bold text-xs px-2.5 py-1 rounded-xl border border-white/20 focus:outline-none cursor-pointer transition">
-              <option value="vietnam">🇻🇳 Vietnam</option>
-              <option value="thailand">🇹🇭 Thailand</option>
-              <option value="japan">🇯🇵 Japan</option>
-              <option value="singapore">🇸🇬 Singapore</option>
-              <option value="indonesia">🇮🇩 Indonesia (Bali)</option>
-              <option value="uae">🇦🇪 UAE (Dubai)</option>
-              <option value="india">🇮🇳 India</option>
-            </select>
+          <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+            <h1 id="tripTitleDisplay" class="text-base sm:text-lg font-bold tracking-tight">Vietnam Family Adventure</h1>
+            
+            <!-- Searchable Country Input Combobox -->
+            <div class="relative">
+              <div class="flex items-center bg-black/25 hover:bg-black/35 rounded-xl border border-white/20 px-2.5 py-1 transition focus-within:ring-2 focus-within:ring-white/40">
+                <span class="text-xs mr-1 opacity-75">🌍</span>
+                <input type="text" id="countrySearchInput" placeholder="Search country..." value="Vietnam" class="bg-transparent text-white font-bold text-xs placeholder:text-rose-200/70 focus:outline-none w-32 sm:w-44">
+                <button id="clearCountrySearch" class="text-white/60 hover:text-white text-xs ml-1 leading-none" title="Clear">&times;</button>
+              </div>
+              <!-- Autocomplete Suggestion Dropdown -->
+              <div id="countryDropdownList" class="absolute top-full left-0 mt-1.5 w-64 max-h-72 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-100 overflow-y-auto hidden z-50 py-1 divide-y divide-slate-100 text-xs custom-scrollbar">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
           </div>
           <p id="tripSubtitleDisplay" class="text-xs text-rose-100 font-medium">Hanoi • Ha Long Bay • Hoi An • Late Nov 2026</p>
         </div>
@@ -117,12 +120,34 @@
             <p id="clockLocal" class="font-bold text-white text-sm font-mono mt-0.5">--:--:--</p>
           </div>
           <div class="bg-black/20 backdrop-blur-sm px-2.5 py-1.5 rounded-xl border border-white/10">
-            <p id="clockDestinationLabel" class="text-[10px] text-sky-200 font-bold uppercase tracking-wider">🇻🇳 Vietnam Time (ICT)</p>
+            <p id="clockDestinationLabel" class="text-[10px] text-sky-200 font-bold uppercase tracking-wider">🇻🇳 Destination Time</p>
             <p id="clockDestination" class="font-bold text-white text-sm font-mono mt-0.5">--:--:--</p>
           </div>
         </div>
       </div>
 
+    </div>
+
+    <!-- Weather Legend Bar -->
+    <div class="bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between flex-wrap gap-2 text-xs">
+      <span class="font-bold text-slate-500 uppercase tracking-wider text-[11px]">🎨 Itinerary Weather Palette:</span>
+      <div class="flex items-center gap-3 flex-wrap text-[11px] font-semibold">
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-800">
+          ☀️ Sunny / Hot
+        </span>
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-sky-50 border border-sky-300 text-sky-800">
+          🌧️ Rainy
+        </span>
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-800">
+          ❄️ Snowy / Cold
+        </span>
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-purple-50 border border-purple-200 text-purple-800">
+          🌫️ Humid
+        </span>
+        <span class="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800">
+          🌤️ Clear & Cool
+        </span>
+      </div>
     </div>
 
     <!-- Map & Group Proximity Split -->
@@ -160,7 +185,7 @@
         </div>
       </div>
 
-      <!-- Right Column: Day Schedule -->
+      <!-- Right Column: Day Schedule with Weather-Colored Tiles -->
       <div class="lg:col-span-6 space-y-4">
         <div class="flex items-center justify-between gap-2 flex-wrap">
           <div class="flex items-center gap-1.5">
@@ -172,7 +197,7 @@
           <span id="activeDayLabel" class="text-xs font-semibold text-slate-500">Day Schedule</span>
         </div>
 
-        <!-- Timeline Cards with Edit/Delete Controls & Google Maps Link -->
+        <!-- Timeline Cards with Live Mini Weather & Dynamic Color Tiles -->
         <div id="itineraryList" class="space-y-3"></div>
       </div>
 
@@ -292,17 +317,9 @@
   </div>
 
   <script>
-    // --- 1. Supported Countries / Destinations Catalog ---
+    // --- 1. Global Tourist Countries Catalog (Comprehensive Auto-Fetch Base) ---
     const DESTINATIONS = {
-      vietnam: {
-        flag: "🇻🇳",
-        title: "Vietnam Family Adventure",
-        subtitle: "Hanoi • Ha Long Bay • Hoi An • Late Nov 2026",
-        timezone: "Asia/Ho_Chi_Minh",
-        timeLabel: "🇻🇳 Vietnam Time (ICT)",
-        city: "Hanoi",
-        lat: 21.0285,
-        lng: 105.8542,
+      vietnam: { flag: "🇻🇳", name: "Vietnam", title: "Vietnam Family Adventure", subtitle: "Hanoi • Ha Long Bay • Hoi An", timezone: "Asia/Ho_Chi_Minh", timeLabel: "🇻🇳 Vietnam Time (ICT)", city: "Hanoi", lat: 21.0285, lng: 105.8542,
         days: [
           { id: "day-1", name: "Day 1 (Nov 24)", date: "Hanoi & Old Quarter", city: "Hanoi", lat: 21.0285, lng: 105.8542 },
           { id: "day-2", name: "Day 2 (Nov 25)", date: "Ha Long Bay Cruise", city: "Ha Long", lat: 20.9500, lng: 107.0733 },
@@ -316,15 +333,7 @@
           { id: "it-5", dayId: "day-3", time: "18:00", name: "Hoi An Lantern Street & River Boat", category: "visit", lat: 15.8801, lng: 108.3380, ticket: null, notes: "Float flower paper lanterns for good luck." }
         ]
       },
-      thailand: {
-        flag: "🇹🇭",
-        title: "Thailand Holiday Trip",
-        subtitle: "Bangkok • Chiang Mai • Phuket",
-        timezone: "Asia/Bangkok",
-        timeLabel: "🇹🇭 Thailand Time (ICT)",
-        city: "Bangkok",
-        lat: 13.7563,
-        lng: 100.5018,
+      thailand: { flag: "🇹🇭", name: "Thailand", title: "Thailand Tropical Escape", subtitle: "Bangkok • Chiang Mai • Phuket", timezone: "Asia/Bangkok", timeLabel: "🇹🇭 Thailand Time (ICT)", city: "Bangkok", lat: 13.7563, lng: 100.5018,
         days: [
           { id: "day-1", name: "Day 1", date: "Bangkok Temples & Chao Phraya", city: "Bangkok", lat: 13.7563, lng: 100.5018 },
           { id: "day-2", name: "Day 2", date: "Chiang Mai Mountain Nature", city: "Chiang Mai", lat: 18.7883, lng: 98.9853 },
@@ -335,92 +344,59 @@
           { id: "th-2", dayId: "day-1", time: "13:00", name: "Pad Thai at Thip Samai", category: "food", lat: 13.7527, lng: 100.5048, ticket: null, notes: "Classic Bangkok street dining." }
         ]
       },
-      japan: {
-        flag: "🇯🇵",
-        title: "Japan Discovery Journey",
-        subtitle: "Tokyo • Kyoto • Osaka",
-        timezone: "Asia/Tokyo",
-        timeLabel: "🇯🇵 Japan Time (JST)",
-        city: "Tokyo",
-        lat: 35.6762,
-        lng: 139.6503,
+      japan: { flag: "🇯🇵", name: "Japan", title: "Japan Discovery Journey", subtitle: "Tokyo • Kyoto • Osaka", timezone: "Asia/Tokyo", timeLabel: "🇯🇵 Japan Time (JST)", city: "Tokyo", lat: 35.6762, lng: 139.6503,
         days: [
-          { id: "day-1", name: "Day 1", date: "Tokyo Shinjuku & Shibuya", city: "Tokyo", lat: 35.6762, lng: 139.6503 },
-          { id: "day-2", name: "Day 2", date: "Kyoto Bamboo & Golden Pavilion", city: "Kyoto", lat: 35.0116, lng: 135.7681 },
-          { id: "day-3", name: "Day 3", date: "Osaka Dotonbori Street Food", city: "Osaka", lat: 34.6937, lng: 135.5023 }
+          { id: "day-1", name: "Day 1", date: "Tokyo Shinjuku & Asakusa", city: "Tokyo", lat: 35.6762, lng: 139.6503 },
+          { id: "day-2", name: "Day 2", date: "Kyoto Bamboo & Golden Pavilion", city: "Kyoto", lat: 35.0116, lng: 135.7681 }
         ],
         items: [
-          { id: "jp-1", dayId: "day-1", time: "10:00", name: "Senso-ji Temple & Asakusa", category: "visit", lat: 35.7148, lng: 139.7967, ticket: null, notes: "Explore traditional market street." },
-          { id: "jp-2", dayId: "day-1", time: "13:00", name: "Ramen at Ichiran Shibuya", category: "food", lat: 35.6618, lng: 139.7011, ticket: null, notes: "Tonkotsu ramen booth." }
+          { id: "jp-1", dayId: "day-1", time: "10:00", name: "Senso-ji Temple & Asakusa", category: "visit", lat: 35.7148, lng: 139.7967, ticket: null, notes: "Historic traditional landmark." },
+          { id: "jp-2", dayId: "day-1", time: "13:00", name: "Ramen at Ichiran Shibuya", category: "food", lat: 35.6618, lng: 139.7011, ticket: null, notes: "Tonkotsu booth." }
         ]
       },
-      singapore: {
-        flag: "🇸🇬",
-        title: "Singapore City Highlights",
-        subtitle: "Marina Bay • Gardens by the Bay • Sentosa",
-        timezone: "Asia/Singapore",
-        timeLabel: "🇸🇬 Singapore Time (SGT)",
-        city: "Singapore",
-        lat: 1.3521,
-        lng: 103.8198,
-        days: [
-          { id: "day-1", name: "Day 1", date: "Marina Bay & Supertree Grove", city: "Singapore", lat: 1.2847, lng: 103.8646 },
-          { id: "day-2", name: "Day 2", date: "Sentosa Island Beach & Universal", city: "Sentosa", lat: 1.2494, lng: 103.8303 }
-        ],
-        items: [
-          { id: "sg-1", dayId: "day-1", time: "10:30", name: "Cloud Forest & Flower Dome", category: "visit", lat: 1.2816, lng: 103.8636, ticket: { pnr: "SG-884", seat: "Skyway" }, notes: "Indoor waterfall and skywalk." }
-        ]
+      france: { flag: "🇫🇷", name: "France", title: "France Cultural Grand Tour", subtitle: "Paris • Nice • Lyon", timezone: "Europe/Paris", timeLabel: "🇫🇷 France Time (CET)", city: "Paris", lat: 48.8566, lng: 2.3522,
+        days: [{ id: "day-1", name: "Day 1", date: "Eiffel Tower & Seine Cruise", city: "Paris", lat: 48.8566, lng: 2.3522 }],
+        items: [{ id: "fr-1", dayId: "day-1", time: "10:00", name: "Eiffel Tower Summit", category: "visit", lat: 48.8584, lng: 2.2945, ticket: { pnr: "FR-PARIS", seat: "Lift" }, notes: "Stunning Paris panoramas." }]
       },
-      indonesia: {
-        flag: "🇮🇩",
-        title: "Bali Island Getaway",
-        subtitle: "Ubud • Seminyak • Uluwatu",
-        timezone: "Asia/Makassar",
-        timeLabel: "🇮🇩 Bali Time (WITA)",
-        city: "Ubud",
-        lat: -8.5069,
-        lng: 115.2625,
-        days: [
-          { id: "day-1", name: "Day 1", date: "Ubud Culture & Rice Terraces", city: "Ubud", lat: -8.5069, lng: 115.2625 },
-          { id: "day-2", name: "Day 2", date: "Uluwatu Cliffs & Sunset", city: "Uluwatu", lat: -8.8291, lng: 115.0849 }
-        ],
-        items: [
-          { id: "id-1", dayId: "day-1", time: "09:30", name: "Tegallalang Rice Terrace Swing", category: "visit", lat: -8.4312, lng: 115.2801, ticket: null, notes: "Stunning valley views." }
-        ]
+      italy: { flag: "🇮🇹", name: "Italy", title: "Italian Historic Journey", subtitle: "Rome • Florence • Venice", timezone: "Europe/Rome", timeLabel: "🇮🇹 Italy Time (CET)", city: "Rome", lat: 41.9028, lng: 12.4964,
+        days: [{ id: "day-1", name: "Day 1", date: "Colosseum & Ancient Rome", city: "Rome", lat: 41.9028, lng: 12.4964 }],
+        items: [{ id: "it-rom-1", dayId: "day-1", time: "09:30", name: "Colosseum Arena Tour", category: "visit", lat: 41.8902, lng: 12.4922, ticket: { pnr: "IT-991", seat: "Arena Gate" }, notes: "Ancient amphitheatre." }]
       },
-      uae: {
-        flag: "🇦🇪",
-        title: "Dubai & Desert Journey",
-        subtitle: "Downtown Dubai • Marina • Desert Safari",
-        timezone: "Asia/Dubai",
-        timeLabel: "🇦🇪 UAE Time (GST)",
-        city: "Dubai",
-        lat: 25.2048,
-        lng: 55.2708,
-        days: [
-          { id: "day-1", name: "Day 1", date: "Downtown Dubai & Burj Khalifa", city: "Dubai", lat: 25.1972, lng: 55.2744 },
-          { id: "day-2", name: "Day 2", date: "Desert Safari & Bedouin Camp", city: "Dubai Desert", lat: 24.8315, lng: 55.4542 }
-        ],
-        items: [
-          { id: "ae-1", dayId: "day-1", time: "11:00", name: "Burj Khalifa Observation Deck", category: "visit", lat: 25.1972, lng: 55.2744, ticket: { pnr: "DXB-991", seat: "Level 124" }, notes: "Panoramas of Dubai skyline." }
-        ]
+      switzerland: { flag: "🇨🇭", name: "Switzerland", title: "Swiss Alps & Lakes", subtitle: "Zurich • Interlaken • Lucerne", timezone: "Europe/Zurich", timeLabel: "🇨🇭 Swiss Time (CET)", city: "Zurich", lat: 47.3769, lng: 8.5417,
+        days: [{ id: "day-1", name: "Day 1", date: "Lake Zurich & Old Town", city: "Zurich", lat: 47.3769, lng: 8.5417 }],
+        items: [{ id: "ch-1", dayId: "day-1", time: "10:00", name: "Lake Zurich Promenade", category: "visit", lat: 47.3667, lng: 8.5417, ticket: null, notes: "Crystal alpine waters." }]
       },
-      india: {
-        flag: "🇮🇳",
-        title: "Incredible India Heritage Trip",
-        subtitle: "Mysore • Coorg • Bangalore",
-        timezone: "Asia/Kolkata",
-        timeLabel: "🇮🇳 India Time (IST)",
-        city: "Mysuru",
-        lat: 12.2958,
-        lng: 76.6394,
-        days: [
-          { id: "day-1", name: "Day 1", date: "Mysore Palace & Chamundi Hills", city: "Mysuru", lat: 12.3051, lng: 76.6551 },
-          { id: "day-2", name: "Day 2", date: "Coorg Coffee Hills & Abbey Falls", city: "Madikeri", lat: 12.4244, lng: 75.7382 }
-        ],
-        items: [
-          { id: "in-1", dayId: "day-1", time: "10:00", name: "Mysore Amba Vilas Palace", category: "visit", lat: 12.3051, lng: 76.6551, ticket: { pnr: "IND-100", seat: "Main Gate" }, notes: "Illumination in the evening." }
-        ]
+      singapore: { flag: "🇸🇬", name: "Singapore", title: "Singapore City Highlights", subtitle: "Marina Bay • Gardens by the Bay", timezone: "Asia/Singapore", timeLabel: "🇸🇬 Singapore Time (SGT)", city: "Singapore", lat: 1.3521, lng: 103.8198,
+        days: [{ id: "day-1", name: "Day 1", date: "Marina Bay & Supertrees", city: "Singapore", lat: 1.2847, lng: 103.8646 }],
+        items: [{ id: "sg-1", dayId: "day-1", time: "10:30", name: "Cloud Forest & Flower Dome", category: "visit", lat: 1.2816, lng: 103.8636, ticket: { pnr: "SG-884", seat: "Skyway" }, notes: "Indoor waterfall and skywalk." }]
+      },
+      indonesia: { flag: "🇮🇩", name: "Indonesia", title: "Bali Island Getaway", subtitle: "Ubud • Seminyak • Uluwatu", timezone: "Asia/Makassar", timeLabel: "🇮🇩 Bali Time (WITA)", city: "Ubud", lat: -8.5069, lng: 115.2625,
+        days: [{ id: "day-1", name: "Day 1", date: "Ubud Culture & Rice Terraces", city: "Ubud", lat: -8.5069, lng: 115.2625 }],
+        items: [{ id: "id-1", dayId: "day-1", time: "09:30", name: "Tegallalang Rice Terrace Swing", category: "visit", lat: -8.4312, lng: 115.2801, ticket: null, notes: "Stunning valley views." }]
+      },
+      uae: { flag: "🇦🇪", name: "UAE (Dubai)", title: "Dubai & Desert Journey", subtitle: "Downtown Dubai • Marina • Desert Safari", timezone: "Asia/Dubai", timeLabel: "🇦🇪 UAE Time (GST)", city: "Dubai", lat: 25.2048, lng: 55.2708,
+        days: [{ id: "day-1", name: "Day 1", date: "Downtown Dubai & Burj Khalifa", city: "Dubai", lat: 25.1972, lng: 55.2744 }],
+        items: [{ id: "ae-1", dayId: "day-1", time: "11:00", name: "Burj Khalifa Observation Deck", category: "visit", lat: 25.1972, lng: 55.2744, ticket: { pnr: "DXB-991", seat: "Level 124" }, notes: "Panoramas of Dubai skyline." }]
+      },
+      india: { flag: "🇮🇳", name: "India", title: "Incredible India Heritage Trip", subtitle: "Mysore • Coorg • Bangalore", timezone: "Asia/Kolkata", timeLabel: "🇮🇳 India Time (IST)", city: "Mysuru", lat: 12.2958, lng: 76.6394,
+        days: [{ id: "day-1", name: "Day 1", date: "Mysore Palace & Chamundi Hills", city: "Mysuru", lat: 12.3051, lng: 76.6551 }],
+        items: [{ id: "in-1", dayId: "day-1", time: "10:00", name: "Mysore Amba Vilas Palace", category: "visit", lat: 12.3051, lng: 76.6551, ticket: { pnr: "IND-100", seat: "Main Gate" }, notes: "Illumination in the evening." }]
+      },
+      maldives: { flag: "🇲🇻", name: "Maldives", title: "Maldives Atoll Paradise", subtitle: "Male • Overwater Villas", timezone: "Indian/Maldives", timeLabel: "🇲🇻 Maldives Time (MVT)", city: "Male", lat: 4.1755, lng: 73.5093,
+        days: [{ id: "day-1", name: "Day 1", date: "Atoll Lagoon & Snorkel Tour", city: "Male", lat: 4.1755, lng: 73.5093 }],
+        items: [{ id: "mv-1", dayId: "day-1", time: "10:00", name: "Coral Reef Snorkel Safari", category: "visit", lat: 4.1800, lng: 73.5100, ticket: null, notes: "Manta rays and reef sharks." }]
+      },
+      spain: { flag: "🇪🇸", name: "Spain", title: "Spanish Wonders & Tapas", subtitle: "Barcelona • Madrid • Seville", timezone: "Europe/Madrid", timeLabel: "🇪🇸 Spain Time (CET)", city: "Barcelona", lat: 41.3879, lng: 2.16992,
+        days: [{ id: "day-1", name: "Day 1", date: "Sagrada Familia & Gothic Quarter", city: "Barcelona", lat: 41.3879, lng: 2.16992 }],
+        items: [{ id: "es-1", dayId: "day-1", time: "10:00", name: "Basílica de la Sagrada Família", category: "visit", lat: 41.4036, lng: 2.1744, ticket: { pnr: "BCN-772", seat: "Tower" }, notes: "Gaudí masterpiece." }]
+      },
+      greece: { flag: "🇬🇷", name: "Greece", title: "Aegean Islands & Antiquities", subtitle: "Athens • Santorini • Mykonos", timezone: "Europe/Athens", timeLabel: "🇬🇷 Greece Time (EET)", city: "Athens", lat: 37.9838, lng: 23.7275,
+        days: [{ id: "day-1", name: "Day 1", date: "Acropolis & Plaka Old Quarter", city: "Athens", lat: 37.9838, lng: 23.7275 }],
+        items: [{ id: "gr-1", dayId: "day-1", time: "09:00", name: "Parthenon at the Acropolis", category: "visit", lat: 37.9715, lng: 23.7267, ticket: null, notes: "Ancient hilltop monument." }]
+      },
+      uk: { flag: "🇬🇧", name: "United Kingdom", title: "British Heritage & Royal City", subtitle: "London • Edinburgh • Bath", timezone: "Europe/London", timeLabel: "🇬🇧 UK Time (GMT)", city: "London", lat: 51.5074, lng: -0.1278,
+        days: [{ id: "day-1", name: "Day 1", date: "Westminster & Thames Walk", city: "London", lat: 51.5074, lng: -0.1278 }],
+        items: [{ id: "uk-1", dayId: "day-1", time: "10:00", name: "Big Ben & Westminster Abbey", category: "visit", lat: 51.4993, lng: -0.1273, ticket: null, notes: "Iconic London clock tower." }]
       }
     };
 
@@ -446,6 +422,9 @@
     let mapInstance = null;
     let markersLayer = null;
     let gpsWatchId = null;
+    
+    // In-memory Stop Weather Cache: `${lat},${lng}` => { temp, rain, humidity, code, condition, type }
+    const stopWeatherCache = {};
 
     // --- 3. Live Dual Clock (Local Time & Destination Time) ---
     function updateLiveClocks() {
@@ -461,7 +440,7 @@
 
       // Destination Time
       const destStr = new Intl.DateTimeFormat([], {
-        timeZone: activeDest.timezone,
+        timeZone: activeDest.timezone || "Asia/Ho_Chi_Minh",
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
@@ -476,13 +455,89 @@
     setInterval(updateLiveClocks, 1000);
     updateLiveClocks();
 
-    // --- 4. Switch Destination Handler ---
-    const destSelector = document.getElementById("destinationSelector");
-    destSelector.value = activeDestKey;
-    destSelector.onchange = (e) => {
-      activeDestKey = e.target.value;
-      activeDest = DESTINATIONS[activeDestKey];
-      localStorage.setItem("travel_active_dest", activeDestKey);
+    // --- 4. Searchable Country Autocomplete & Geocoding Fetcher ---
+    const countrySearchInput = document.getElementById("countrySearchInput");
+    const countryDropdownList = document.getElementById("countryDropdownList");
+    const clearCountrySearch = document.getElementById("clearCountrySearch");
+
+    function renderCountryDropdown(filterText = "") {
+      const q = filterText.toLowerCase().trim();
+      const matches = Object.keys(DESTINATIONS).filter(key => {
+        const d = DESTINATIONS[key];
+        return d.name.toLowerCase().includes(q) || d.title.toLowerCase().includes(q) || d.city.toLowerCase().includes(q);
+      });
+
+      countryDropdownList.innerHTML = "";
+
+      if (matches.length > 0) {
+        matches.forEach(key => {
+          const item = DESTINATIONS[key];
+          const div = document.createElement("div");
+          div.className = "px-3.5 py-2 hover:bg-slate-50 cursor-pointer flex items-center justify-between transition";
+          div.innerHTML = `
+            <div class="flex items-center gap-2">
+              <span class="text-base">${item.flag}</span>
+              <div>
+                <p class="font-bold text-slate-800">${item.name}</p>
+                <p class="text-[10px] text-slate-400">${item.city} • ${item.timeLabel.split(' ')[2] || ''}</p>
+              </div>
+            </div>
+            <span class="text-[10px] text-blue-600 font-semibold bg-blue-50 px-2 py-0.5 rounded-lg">Select</span>
+          `;
+          div.onclick = () => selectDestination(key);
+          countryDropdownList.appendChild(div);
+        });
+      } else {
+        // Fallback option: Live fetch any custom location from Open-Meteo Geocoding
+        const fallbackDiv = document.createElement("div");
+        fallbackDiv.className = "px-3.5 py-2.5 text-center";
+        fallbackDiv.innerHTML = `
+          <p class="text-xs text-slate-500 mb-1.5">No preset country found for "${filterText}"</p>
+          <button id="fetchCustomCountryBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition">
+            🔍 Search Worldwide via Geocoding
+          </button>
+        `;
+        countryDropdownList.appendChild(fallbackDiv);
+
+        document.getElementById("fetchCustomCountryBtn").onclick = () => searchWorldwideGeocoding(filterText);
+      }
+
+      countryDropdownList.classList.remove("hidden");
+    }
+
+    countrySearchInput.onfocus = () => {
+      renderCountryDropdown(countrySearchInput.value);
+    };
+
+    countrySearchInput.oninput = (e) => {
+      const val = e.target.value;
+      clearCountrySearch.classList.toggle("hidden", !val);
+      renderCountryDropdown(val);
+    };
+
+    clearCountrySearch.onclick = () => {
+      countrySearchInput.value = "";
+      clearCountrySearch.classList.add("hidden");
+      renderCountryDropdown("");
+      countrySearchInput.focus();
+    };
+
+    // Close suggestions when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!countrySearchInput.contains(e.target) && !countryDropdownList.contains(e.target)) {
+        countryDropdownList.classList.add("hidden");
+      }
+    });
+
+    // Select Destination Handler
+    function selectDestination(key) {
+      activeDestKey = key;
+      activeDest = DESTINATIONS[key];
+      localStorage.setItem("travel_active_dest", key);
+
+      countrySearchInput.value = activeDest.name;
+      countryDropdownList.classList.add("hidden");
+      clearCountrySearch.classList.remove("hidden");
 
       // Update Header Text & Flag
       document.getElementById("countryFlagIcon").textContent = activeDest.flag;
@@ -490,20 +545,61 @@
       document.getElementById("tripSubtitleDisplay").textContent = activeDest.subtitle;
       document.getElementById("clockDestinationLabel").textContent = activeDest.timeLabel;
 
-      // Load or fallback days & items
+      // Load days & items
       STATE.days = JSON.parse(localStorage.getItem(`travel_days_${activeDestKey}`)) || activeDest.days;
       STATE.items = JSON.parse(localStorage.getItem(`travel_items_${activeDestKey}`)) || activeDest.items;
       STATE.currentDayId = STATE.days[0].id;
 
       // Update Map view
       if (mapInstance) {
-        mapInstance.setView([activeDest.lat, activeDest.lng], 12);
+        mapInstance.setView([activeDest.lat, activeDest.lng], 11);
       }
 
       fetchWeatherForDay(STATE.days[0]);
       render();
       updateLiveClocks();
-    };
+    }
+
+    // Auto-fetch any worldwide country via Open-Meteo Geocoding
+    async function searchWorldwideGeocoding(query) {
+      if (!query || query.length < 2) return;
+      try {
+        countrySearchInput.value = "Fetching coordinates...";
+        const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en&format=json`);
+        const data = await res.json();
+        if (data && data.results && data.results.length > 0) {
+          const loc = data.results[0];
+          const customKey = loc.name.toLowerCase().replace(/\s+/g, '_');
+          
+          DESTINATIONS[customKey] = {
+            flag: "✈️",
+            name: `${loc.name}, ${loc.country || ''}`,
+            title: `${loc.name} Adventure`,
+            subtitle: `${loc.country || 'Global Travel'} • Custom Itinerary`,
+            timezone: loc.timezone || "UTC",
+            timeLabel: `${loc.name} Time (${loc.timezone || 'UTC'})`,
+            city: loc.name,
+            lat: loc.latitude,
+            lng: loc.longitude,
+            days: [
+              { id: "day-1", name: "Day 1", date: `${loc.name} Arrival & City Tour`, city: loc.name, lat: loc.latitude, lng: loc.longitude }
+            ],
+            items: [
+              { id: `it-${Date.now()}`, dayId: "day-1", time: "10:00", name: `Explore ${loc.name}`, category: "visit", lat: loc.latitude, lng: loc.longitude, ticket: null, notes: "Added via global search." }
+            ]
+          };
+
+          selectDestination(customKey);
+        } else {
+          alert(`No geocoding matches found for "${query}". Try another country.`);
+          countrySearchInput.value = activeDest.name;
+        }
+      } catch (err) {
+        console.error("Geocoding failed", err);
+        alert("Could not fetch location data.");
+        countrySearchInput.value = activeDest.name;
+      }
+    }
 
     // --- 5. Permissions Engine ---
     window.evaluateUserPermissions = function(user) {
@@ -690,7 +786,7 @@
       return `${(meters / 1000).toFixed(1)} km away`;
     }
 
-    // --- 9. Weather Integration (Open-Meteo) ---
+    // --- 9. City Weather Integration ---
     async function fetchWeatherForDay(day) {
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${day.lat}&longitude=${day.lng}&current=temperature_2m,precipitation,weather_code,wind_speed_10m`;
@@ -701,7 +797,7 @@
           const rain = data.current.precipitation || 0;
           const wind = Math.round(data.current.wind_speed_10m || 5);
           
-          document.getElementById("weatherCity").textContent = `${day.city}, ${activeDest.title.split(' ')[0]}`;
+          document.getElementById("weatherCity").textContent = `${day.city}, ${activeDest.name}`;
           document.getElementById("weatherTemp").textContent = `${temp}°C`;
           document.getElementById("weatherRain").textContent = `Rain: ${rain} mm`;
           document.getElementById("weatherWind").textContent = `Wind: ${wind} km/h`;
@@ -726,7 +822,71 @@
       }
     }
 
-    // --- 10. Leaflet Map with Esri World Street Tiles (English, Free, No Watermark) ---
+    // --- 10. Per-Stop Live Weather & Color Tile Classifier ---
+    async function fetchWeatherForStop(lat, lng) {
+      const cacheKey = `${lat.toFixed(3)},${lng.toFixed(3)}`;
+      if (stopWeatherCache[cacheKey]) return stopWeatherCache[cacheKey];
+
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,precipitation,weather_code,relative_humidity_2m`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data && data.current) {
+          const temp = Math.round(data.current.temperature_2m);
+          const rain = data.current.precipitation || 0;
+          const code = data.current.weather_code;
+          const humidity = data.current.relative_humidity_2m || 50;
+
+          // Weather Classification Engine
+          let type = "clear"; // default
+          let label = `🌤️ Clear (${temp}°C)`;
+          let cardClasses = "bg-emerald-50/70 border-emerald-300 hover:border-emerald-400";
+          let badgeClasses = "bg-emerald-100 text-emerald-800 border border-emerald-300";
+
+          if (code >= 71 && code <= 86 || temp <= 2) {
+            type = "snowy";
+            label = `❄️ Snowy (${temp}°C)`;
+            cardClasses = "bg-indigo-50/80 border-indigo-200 hover:border-indigo-300";
+            badgeClasses = "bg-indigo-100 text-indigo-800 border border-indigo-200";
+          } else if (code >= 51 && code <= 67 || code >= 80 && code <= 82 || code >= 95 || rain > 0.4) {
+            type = "rainy";
+            label = `🌧️ Rain (${temp}°C)`;
+            cardClasses = "bg-sky-50/85 border-sky-300 hover:border-sky-400";
+            badgeClasses = "bg-sky-100 text-sky-800 border border-sky-300";
+          } else if (temp >= 31 || (temp >= 28 && code <= 1)) {
+            type = "sunny";
+            label = `☀️ Hot & Sunny (${temp}°C)`;
+            cardClasses = "bg-amber-50/80 border-amber-300 hover:border-amber-400";
+            badgeClasses = "bg-amber-100 text-amber-900 border border-amber-300";
+          } else if (humidity >= 78 && temp >= 24) {
+            type = "humid";
+            label = `🌫️ Humid (${temp}°C, ${humidity}%)`;
+            cardClasses = "bg-purple-50/75 border-purple-200 hover:border-purple-300";
+            badgeClasses = "bg-purple-100 text-purple-800 border border-purple-200";
+          } else {
+            type = "clear";
+            label = `🌤️ Pleasant (${temp}°C)`;
+            cardClasses = "bg-emerald-50/70 border-emerald-300 hover:border-emerald-400";
+            badgeClasses = "bg-emerald-100 text-emerald-800 border border-emerald-300";
+          }
+
+          stopWeatherCache[cacheKey] = { temp, rain, code, humidity, type, label, cardClasses, badgeClasses };
+          return stopWeatherCache[cacheKey];
+        }
+      } catch (e) {
+        console.warn("Stop weather fetch failed", e);
+      }
+
+      return {
+        type: "default",
+        label: "🌤️ Live Weather",
+        cardClasses: "bg-white border-slate-200 hover:border-slate-300",
+        badgeClasses: "bg-slate-100 text-slate-700 border border-slate-200"
+      };
+    }
+
+    // --- 11. Leaflet Map with Esri World Street Tiles (English, Free, No Watermark) ---
     function initMap() {
       if (mapInstance) return;
       mapInstance = L.map('map').setView([activeDest.lat, activeDest.lng], 12);
@@ -807,7 +967,7 @@
       });
     }
 
-    // --- 11. GPS Location Broadcasting ---
+    // --- 12. GPS Location Broadcasting ---
     const toggleGpsBtn = document.getElementById("toggleGpsBtn");
     const gpsDot = document.getElementById("gpsDot");
     const gpsBtnText = document.getElementById("gpsBtnText");
@@ -849,7 +1009,7 @@
       }
     };
 
-    // --- 12. Render Day Tabs & Schedule Items ---
+    // --- 13. Render Day Tabs & Schedule Items with Weather Color Tiles ---
     function render() {
       // Day Tabs
       const tabs = document.getElementById("dayTabsContainer");
@@ -885,14 +1045,23 @@
 
       dayItems.forEach(item => {
         const card = document.createElement("div");
-        card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow transition space-y-2 cursor-pointer";
+        // Initial soft state; dynamically updated when weather loads
+        card.id = `card-${item.id}`;
+        card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:shadow transition-all duration-200 space-y-2 cursor-pointer";
         card.onclick = () => mapInstance.flyTo([item.lat, item.lng], 14);
 
         card.innerHTML = `
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">⏰ ${item.time}</span>
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-rose-600">${item.category.toUpperCase()}</span>
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="text-xs font-bold text-slate-700 bg-white/80 border border-slate-200/80 px-2 py-0.5 rounded-md">⏰ ${item.time}</span>
+              <span class="text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200/60 px-2 py-0.5 rounded-md">${item.category.toUpperCase()}</span>
+              <!-- Mini Weather Widget Badge -->
+              <span id="weather-badge-${item.id}" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1">
+                ⏳ Loading weather...
+              </span>
+            </div>
+            
+            <div class="flex items-center gap-1.5">
               ${canEdit ? `
                 <button onclick="event.stopPropagation(); editItem('${item.id}')" class="text-xs text-blue-600 hover:text-blue-800 font-semibold px-2 py-0.5 bg-blue-50 hover:bg-blue-100 rounded-lg transition" title="Edit stop">
                   ✏️ Edit
@@ -903,17 +1072,18 @@
               ` : ''}
             </div>
           </div>
+
           <h4 class="text-sm font-bold text-slate-900">${item.name}</h4>
-          ${item.notes ? `<p class="text-xs text-slate-500">${item.notes}</p>` : ''}
+          ${item.notes ? `<p class="text-xs text-slate-600">${item.notes}</p>` : ''}
           ${item.ticket ? `
-            <div class="bg-slate-50 p-2 rounded-xl text-xs text-slate-600 flex justify-between">
+            <div class="bg-white/80 p-2 rounded-xl text-xs text-slate-600 border border-slate-200/80 flex justify-between">
               <span>🎟️ Ref: <strong>${item.ticket.pnr}</strong></span>
               <span>Seat: ${item.ticket.seat}</span>
             </div>
           ` : ''}
           
           <!-- Google Maps Direct Navigation Link -->
-          <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+          <div class="flex items-center justify-between pt-2 border-t border-slate-200/50 text-xs">
             <a href="https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 hover:underline">
               🗺️ Navigate in Google Maps
             </a>
@@ -921,6 +1091,19 @@
           </div>
         `;
         list.appendChild(card);
+
+        // Fetch stop weather asynchronously & apply dynamic color theme
+        fetchWeatherForStop(item.lat, item.lng).then(w => {
+          const badge = document.getElementById(`weather-badge-${item.id}`);
+          const targetCard = document.getElementById(`card-${item.id}`);
+          if (badge) {
+            badge.className = `text-[11px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 shadow-2xs ${w.badgeClasses}`;
+            badge.textContent = w.label;
+          }
+          if (targetCard) {
+            targetCard.className = `p-4 rounded-2xl border shadow-xs hover:shadow-md transition-all duration-300 space-y-2 cursor-pointer ${w.cardClasses}`;
+          }
+        });
       });
 
       document.getElementById("memberCountBadge").textContent = STATE.members.length;
